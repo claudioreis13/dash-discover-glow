@@ -275,7 +275,7 @@ export function FornecedorTable() {
                         </TableCell>
                       </TableRow>
                       {isOpen && (
-                        <TableRow key={`${f.id}-detail`} className="bg-muted/30">
+                        <TableRow className="bg-muted/30">
                           <TableCell></TableCell>
                           <TableCell colSpan={6} className="py-3">
                             <ul className="space-y-1.5">
