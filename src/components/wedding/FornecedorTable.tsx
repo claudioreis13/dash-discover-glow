@@ -202,8 +202,8 @@ export function FornecedorTable() {
                     f.valorTotal > 0 ? (pago / f.valorTotal) * 100 : 0;
                   const isOpen = expanded.has(f.id);
                   return (
-                    <>
-                      <TableRow key={f.id} className="group">
+                    <Fragment key={f.id}>
+                      <TableRow className="group">
                         <TableCell>
                           <Button
                             size="icon"
