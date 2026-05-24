@@ -14,6 +14,7 @@ interface WeddingStore {
   settings: Settings;
 
   addFornecedor: (f: Omit<Fornecedor, "id">) => void;
+  restoreFornecedor: (f: Fornecedor) => void;
   updateFornecedor: (id: string, f: Partial<Fornecedor>) => void;
   deleteFornecedor: (id: string) => void;
   toggleParcelaPaga: (fornecedorId: string, numero: number) => void;
