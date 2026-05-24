@@ -314,7 +314,7 @@ export function FornecedorTable() {
                           </TableCell>
                         </TableRow>
                       )}
-                    </>
+                    </Fragment>
                   );
                 })
               )}
