@@ -56,6 +56,10 @@ export const useWeddingStore = create<WeddingStore>()(
           ],
         })),
 
+      restoreFornecedor: (f) =>
+        set((s) => ({ fornecedores: [...s.fornecedores, f] })),
+
+
       updateFornecedor: (id, updates) =>
         set((s) => ({
           fornecedores: s.fornecedores.map((f) => {
