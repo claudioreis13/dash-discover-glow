@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -28,40 +28,51 @@ import {
   type PrioridadeType,
 } from "@/types/wedding";
 import { useWeddingStore } from "@/store/useWeddingStore";
+import { toast } from "sonner";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   fornecedor?: Fornecedor | null;
+  defaultCategoria?: CategoriaType;
 }
 
-const emptyForm = {
-  nome: "",
-  categoria: "festa" as CategoriaType,
-  valorTotal: 0,
-  dataCont: new Date().toISOString().split("T")[0],
-  vencimento: new Date().toISOString().split("T")[0],
-  prioridade: "média" as PrioridadeType,
-  observacoes: "",
-  contato: "",
-  email: "",
-  parcelas: [
-    { numero: 1, valor: 0, dataPagamento: new Date().toISOString().split("T")[0], pago: false },
-  ] as Parcela[],
-};
+const today = () => new Date().toISOString().split("T")[0];
 
-export function FornecedorDialog({ open, onOpenChange, fornecedor }: Props) {
+function makeEmpty(categoria: CategoriaType = "festa") {
+  return {
+    nome: "",
+    categoria,
+    valorTotal: 0,
+    dataCont: today(),
+    vencimento: today(),
+    prioridade: "média" as PrioridadeType,
+    observacoes: "",
+    contato: "",
+    email: "",
+    parcelas: [
+      { numero: 1, valor: 0, dataPagamento: today(), pago: false },
+    ] as Parcela[],
+  };
+}
+
+export function FornecedorDialog({
+  open,
+  onOpenChange,
+  fornecedor,
+  defaultCategoria,
+}: Props) {
   const { addFornecedor, updateFornecedor } = useWeddingStore();
   const [form, setForm] = useState(() =>
-    fornecedor ? { ...fornecedor } : emptyForm,
+    fornecedor ? { ...fornecedor } : makeEmpty(defaultCategoria),
   );
 
-  // Reset when prop changes
-  const [lastId, setLastId] = useState(fornecedor?.id);
-  if (fornecedor?.id !== lastId) {
-    setLastId(fornecedor?.id);
-    setForm(fornecedor ? { ...fornecedor } : emptyForm);
-  }
+  // Reset whenever dialog opens or target changes
+  useEffect(() => {
+    if (open) {
+      setForm(fornecedor ? { ...fornecedor } : makeEmpty(defaultCategoria));
+    }
+  }, [open, fornecedor, defaultCategoria]);
 
   const setField = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -81,7 +92,7 @@ export function FornecedorDialog({ open, onOpenChange, fornecedor }: Props) {
         {
           numero: f.parcelas.length + 1,
           valor: 0,
-          dataPagamento: new Date().toISOString().split("T")[0],
+          dataPagamento: today(),
           pago: false,
         },
       ],
@@ -97,8 +108,17 @@ export function FornecedorDialog({ open, onOpenChange, fornecedor }: Props) {
     }));
   };
 
+  const somaParcelas = form.parcelas.reduce(
+    (a, p) => a + (Number(p.valor) || 0),
+    0,
+  );
+  const sincronizarValor = () => setField("valorTotal", somaParcelas);
+
   const handleSave = () => {
-    if (!form.nome.trim()) return;
+    if (!form.nome.trim()) {
+      toast.error("Informe o nome do fornecedor");
+      return;
+    }
     const payload = {
       nome: form.nome.trim(),
       categoria: form.categoria,
@@ -116,11 +136,12 @@ export function FornecedorDialog({ open, onOpenChange, fornecedor }: Props) {
     };
     if (fornecedor) {
       updateFornecedor(fornecedor.id, payload);
+      toast.success("Fornecedor atualizado");
     } else {
       addFornecedor({ ...payload, status: "pendente" });
+      toast.success("Fornecedor adicionado");
     }
     onOpenChange(false);
-    setForm(emptyForm);
   };
 
   return (
@@ -184,14 +205,28 @@ export function FornecedorDialog({ open, onOpenChange, fornecedor }: Props) {
             </div>
             <div>
               <Label htmlFor="valor">Valor total (R$)</Label>
-              <Input
-                id="valor"
-                type="number"
-                value={form.valorTotal}
-                onChange={(e) =>
-                  setField("valorTotal", Number(e.target.value))
-                }
-              />
+              <div className="flex gap-2">
+                <Input
+                  id="valor"
+                  type="number"
+                  value={form.valorTotal || ""}
+                  placeholder="0"
+                  onChange={(e) =>
+                    setField("valorTotal", Number(e.target.value))
+                  }
+                />
+                {somaParcelas !== form.valorTotal && somaParcelas > 0 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={sincronizarValor}
+                    title={`Igualar à soma das parcelas (${somaParcelas})`}
+                  >
+                    = {somaParcelas}
+                  </Button>
+                )}
+              </div>
             </div>
             <div>
               <Label htmlFor="venc">Vencimento final</Label>
@@ -230,7 +265,12 @@ export function FornecedorDialog({ open, onOpenChange, fornecedor }: Props) {
 
           <div className="border-t pt-4">
             <div className="flex items-center justify-between mb-3">
-              <Label className="text-sm font-semibold">Parcelas</Label>
+              <div>
+                <Label className="text-sm font-semibold">Parcelas</Label>
+                <p className="text-xs text-muted-foreground">
+                  Soma: R$ {somaParcelas.toLocaleString("pt-BR")}
+                </p>
+              </div>
               <Button
                 size="sm"
                 variant="outline"
@@ -252,7 +292,7 @@ export function FornecedorDialog({ open, onOpenChange, fornecedor }: Props) {
                   <Input
                     type="number"
                     placeholder="Valor"
-                    value={p.valor}
+                    value={p.valor || ""}
                     onChange={(e) =>
                       updateParcela(idx, { valor: Number(e.target.value) })
                     }
@@ -264,8 +304,12 @@ export function FornecedorDialog({ open, onOpenChange, fornecedor }: Props) {
                       updateParcela(idx, { dataPagamento: e.target.value })
                     }
                   />
-                  <label className="flex items-center gap-1 text-xs">
+                  <label
+                    className="flex items-center gap-1 text-xs"
+                    htmlFor={`pago-${idx}`}
+                  >
                     <Checkbox
+                      id={`pago-${idx}`}
                       checked={p.pago}
                       onCheckedChange={(v) =>
                         updateParcela(idx, { pago: !!v })
@@ -279,6 +323,7 @@ export function FornecedorDialog({ open, onOpenChange, fornecedor }: Props) {
                     type="button"
                     onClick={() => removeParcela(idx)}
                     disabled={form.parcelas.length === 1}
+                    aria-label="Remover parcela"
                   >
                     <Trash2 className="w-4 h-4 text-destructive" />
                   </Button>
