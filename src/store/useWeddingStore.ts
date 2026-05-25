@@ -228,7 +228,7 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
       if (s.noivos !== undefined) payload.noivos = s.noivos;
       if (s.dataCasamento !== undefined) payload.data_casamento = s.dataCasamento || null;
       if (Object.keys(payload).length > 0) {
-        void supabase.from("user_settings").update(payload).eq("user_id", userId);
+        void supabase.from("user_settings").update(payload as never).eq("user_id", userId);
       }
     }
   },
