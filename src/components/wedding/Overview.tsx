@@ -11,7 +11,7 @@ import { MetricCard } from "./MetricCard";
 import { BudgetDonut } from "./BudgetDonut";
 import { PaymentTimeline } from "./PaymentTimeline";
 import { HeroCard } from "./HeroCard";
-import { EmptyState } from "./EmptyState";
+
 import { PaymentCalendar } from "./PaymentCalendar";
 import {
   formatCurrency,
@@ -28,7 +28,11 @@ export function Overview() {
     return (
       <div className="space-y-6">
         <HeroCard />
-        <EmptyState />
+        <Card className="p-10 text-center text-sm text-muted-foreground border-dashed">
+          Nenhum fornecedor cadastrado ainda. Vá para a aba{" "}
+          <span className="font-medium text-foreground">Início</span> para
+          adicionar o primeiro.
+        </Card>
       </div>
     );
   }
