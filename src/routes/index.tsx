@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/wedding/EmptyState";
 import { QuickAddButton } from "@/components/wedding/QuickAddButton";
 import { TopNav, type TabValue } from "@/components/wedding/TopNav";
 import { SettingsDialog } from "@/components/wedding/SettingsDialog";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 
 export const Route = createFileRoute("/")({
   head: () => ({
