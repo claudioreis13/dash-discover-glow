@@ -3,18 +3,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Moon, Sun, Settings, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useWeddingStore } from "@/store/useWeddingStore";
@@ -31,8 +22,7 @@ export const Route = createFileRoute("/")({
       { title: "Dashboard Financeiro do Casamento" },
       {
         name: "description",
-        content:
-          "Gerencie orçamento, fornecedores e parcelas do seu casamento em um só lugar.",
+        content: "Gerencie orçamento, fornecedores e parcelas do seu casamento em um só lugar.",
       },
     ],
   }),
@@ -40,14 +30,8 @@ export const Route = createFileRoute("/")({
 });
 
 function WeddingDashboard() {
-  const {
-    darkMode,
-    toggleDarkMode,
-    settings,
-    orcamentoTotal,
-    saveSettings,
-    userId,
-  } = useWeddingStore();
+  const { darkMode, toggleDarkMode, settings, orcamentoTotal, saveSettings, userId } =
+    useWeddingStore();
   const { isAdmin } = useIsAdmin(userId);
 
   useEffect(() => {
@@ -77,18 +61,24 @@ function WeddingDashboard() {
     }
   };
 
-
-
   return (
     <div className="min-h-screen bg-background pb-[env(safe-area-inset-bottom)]">
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-3 flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 sm:gap-0 relative">
           <Tabs value={tab} onValueChange={setTab} className="w-full sm:w-auto order-2 sm:order-1">
             <TabsList className="w-full sm:w-auto grid grid-cols-4 sm:inline-flex h-9">
-              <TabsTrigger value="inicio" className="text-xs sm:text-sm px-2">Início</TabsTrigger>
-              <TabsTrigger value="overview" className="text-xs sm:text-sm px-2">Visão</TabsTrigger>
-              <TabsTrigger value="fornecedores" className="text-xs sm:text-sm px-2">Fornec.</TabsTrigger>
-              <TabsTrigger value="relatorios" className="text-xs sm:text-sm px-2">Relatórios</TabsTrigger>
+              <TabsTrigger value="inicio" className="text-xs sm:text-sm px-2">
+                Início
+              </TabsTrigger>
+              <TabsTrigger value="overview" className="text-xs sm:text-sm px-2">
+                Visão
+              </TabsTrigger>
+              <TabsTrigger value="fornecedores" className="text-xs sm:text-sm px-2">
+                Fornec.
+              </TabsTrigger>
+              <TabsTrigger value="relatorios" className="text-xs sm:text-sm px-2">
+                Relatórios
+              </TabsTrigger>
             </TabsList>
           </Tabs>
 
@@ -160,11 +150,7 @@ function WeddingDashboard() {
               onClick={toggleDarkMode}
               aria-label="Alternar tema"
             >
-              {darkMode ? (
-                <Sun className="w-4 h-4" />
-              ) : (
-                <Moon className="w-4 h-4" />
-              )}
+              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
             </Button>
             <Button
               variant="ghost"

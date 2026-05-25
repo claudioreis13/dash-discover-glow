@@ -35,9 +35,7 @@ export function computeStatus(f: Pick<Fornecedor, "parcelas">): StatusType {
   if (total === 0) return "pendente";
   if (pagas === total) return "pago";
   const hoje = new Date();
-  const atrasada = f.parcelas.some(
-    (p) => !p.pago && new Date(p.dataPagamento) < hoje,
-  );
+  const atrasada = f.parcelas.some((p) => !p.pago && new Date(p.dataPagamento) < hoje);
   if (atrasada) return "atrasado";
   if (pagas === 0) return "pendente";
   return "parcial";
@@ -195,7 +193,10 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
       const row = fornecedorToRow(u, userId) as Record<string, unknown>;
       delete row.id;
       delete row.user_id;
-      await supabase.from("fornecedores").update(row as never).eq("id", id);
+      await supabase
+        .from("fornecedores")
+        .update(row as never)
+        .eq("id", id);
     }
   },
 
@@ -211,9 +212,7 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
     set((s) => ({
       fornecedores: s.fornecedores.map((f) => {
         if (f.id !== fornecedorId) return f;
-        const parcelas = f.parcelas.map((p) =>
-          p.numero === numero ? { ...p, pago: !p.pago } : p,
-        );
+        const parcelas = f.parcelas.map((p) => (p.numero === numero ? { ...p, pago: !p.pago } : p));
         const next = { ...f, parcelas, status: computeStatus({ parcelas }) };
         updated = next;
         return next;
@@ -233,10 +232,11 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
     set({ orcamentoTotal: v });
     if (userId) {
       const state = get();
-      void supabase.from("user_settings").upsert(
-        settingsToRow(userId, state.settings, v, state.darkMode),
-        { onConflict: "user_id" },
-      );
+      void supabase
+        .from("user_settings")
+        .upsert(settingsToRow(userId, state.settings, v, state.darkMode), {
+          onConflict: "user_id",
+        });
     }
   },
 
@@ -245,10 +245,11 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
     set((state) => ({ settings: { ...state.settings, ...s } }));
     if (userId) {
       const state = get();
-      void supabase.from("user_settings").upsert(
-        settingsToRow(userId, state.settings, state.orcamentoTotal, state.darkMode),
-        { onConflict: "user_id" },
-      );
+      void supabase
+        .from("user_settings")
+        .upsert(settingsToRow(userId, state.settings, state.orcamentoTotal, state.darkMode), {
+          onConflict: "user_id",
+        });
     }
   },
 
@@ -261,10 +262,11 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
       dataCasamento: nextSettings.dataCasamento,
     };
 
-    const { error } = await supabase.from("user_settings").upsert(
-      settingsToRow(userId, normalizedSettings, nextOrcamentoTotal, get().darkMode),
-      { onConflict: "user_id" },
-    );
+    const { error } = await supabase
+      .from("user_settings")
+      .upsert(settingsToRow(userId, normalizedSettings, nextOrcamentoTotal, get().darkMode), {
+        onConflict: "user_id",
+      });
 
     if (error) return false;
 
@@ -278,10 +280,11 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
     set({ darkMode: next });
     if (userId) {
       const state = get();
-      void supabase.from("user_settings").upsert(
-        settingsToRow(userId, state.settings, state.orcamentoTotal, next),
-        { onConflict: "user_id" },
-      );
+      void supabase
+        .from("user_settings")
+        .upsert(settingsToRow(userId, state.settings, state.orcamentoTotal, next), {
+          onConflict: "user_id",
+        });
     }
   },
 }));
