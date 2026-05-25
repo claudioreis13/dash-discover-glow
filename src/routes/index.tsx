@@ -135,7 +135,7 @@ function WeddingDashboard() {
           </TabsList>
 
           <TabsContent value="inicio" className="space-y-6">
-            {temFornecedores ? <HeroCard /> : <EmptyState />}
+            <EmptyState />
           </TabsContent>
           <TabsContent value="overview" className="space-y-6">
             <Overview />
