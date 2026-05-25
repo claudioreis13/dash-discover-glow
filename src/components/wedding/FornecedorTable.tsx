@@ -41,6 +41,7 @@ import {
   Trash2,
   MoreVertical,
   Plus,
+  ShoppingBag,
   Search,
   ChevronDown,
   ChevronRight,
