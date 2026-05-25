@@ -80,6 +80,7 @@ export function FornecedorTable() {
   );
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Fornecedor | null>(null);
+  const [dialogTipo, setDialogTipo] = useState<TipoLancamento>("fornecedor");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [toDelete, setToDelete] = useState<Fornecedor | null>(null);
 
@@ -93,12 +94,14 @@ export function FornecedorTable() {
     });
   }, [fornecedores, search, filterCat, filterStatus]);
 
-  const openNew = () => {
+  const openNew = (tipo: TipoLancamento = "fornecedor") => {
     setEditing(null);
+    setDialogTipo(tipo);
     setDialogOpen(true);
   };
   const openEdit = (f: Fornecedor) => {
     setEditing(f);
+    setDialogTipo(f.tipo ?? "fornecedor");
     setDialogOpen(true);
   };
 
