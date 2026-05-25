@@ -1,20 +1,26 @@
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { loginWithIdentifier } from "@/lib/auth-login.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 export function LoginPage() {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const login = useServerFn(loginWithIdentifier);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { access_token, refresh_token } = await login({
+        data: { identifier, password },
+      });
+      const { error } = await supabase.auth.setSession({ access_token, refresh_token });
       if (error) throw error;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao entrar");
@@ -37,14 +43,17 @@ export function LoginPage() {
 
         <form onSubmit={onSubmit} className="space-y-4">
           <div className="space-y-1">
-            <Label htmlFor="email">E-mail</Label>
+            <Label htmlFor="identifier">Usuário</Label>
             <Input
-              id="email"
-              type="email"
+              id="identifier"
+              type="text"
               required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="username"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
             />
           </div>
           <div className="space-y-1">
