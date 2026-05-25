@@ -71,7 +71,7 @@ const statusStyle: Record<StatusType, string> = {
 };
 
 export function FornecedorTable() {
-  const { fornecedores, deleteFornecedor, restoreFornecedor, toggleParcelaPaga } =
+  const { fornecedores, deleteFornecedor, restoreFornecedor } =
     useWeddingStore();
   const [search, setSearch] = useState("");
   const [filterCat, setFilterCat] = useState<CategoriaType | "todos">("todos");
