@@ -213,7 +213,7 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
       toast.error("Não foi possível salvar", {
         description: extractErrorMessage(e, `Falha ao adicionar ${newF.nome}.`),
       });
-      throw e;
+      // swallow: rollback + toast already handled
     }
   },
 
@@ -235,7 +235,7 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
       toast.error("Não foi possível restaurar", {
         description: extractErrorMessage(e, `Falha ao restaurar ${f.nome}.`),
       });
-      throw e;
+      // swallow: rollback + toast already handled
     }
   },
 
@@ -268,7 +268,7 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
       toast.error("Não foi possível atualizar", {
         description: extractErrorMessage(e, `Falha ao atualizar ${u.nome}.`),
       });
-      throw e;
+      // swallow: rollback + toast already handled
     }
   },
 
@@ -291,7 +291,7 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
       toast.error("Não foi possível remover", {
         description: extractErrorMessage(e, target ? `Falha ao remover ${target.nome}.` : "Tente novamente."),
       });
-      throw e;
+      // swallow: rollback + toast already handled
     }
   },
 
@@ -334,7 +334,7 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
       toast.error("Não foi possível salvar a parcela", {
         description: extractErrorMessage(e, `Falha ao atualizar parcela #${numero}.`),
       });
-      throw e;
+      // swallow: rollback + toast already handled
     }
   },
 
