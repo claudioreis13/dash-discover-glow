@@ -20,7 +20,6 @@ import { Overview } from "@/components/wedding/Overview";
 import { FornecedorTable } from "@/components/wedding/FornecedorTable";
 import { Relatorios } from "@/components/wedding/Relatorios";
 import { EmptyState } from "@/components/wedding/EmptyState";
-import { HeroCard } from "@/components/wedding/HeroCard";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -44,7 +43,6 @@ function WeddingDashboard() {
     setSettings,
     orcamentoTotal,
     setOrcamentoTotal,
-    fornecedores,
   } = useWeddingStore();
 
   useEffect(() => {
@@ -52,7 +50,6 @@ function WeddingDashboard() {
   }, [darkMode]);
 
   const [tab, setTab] = useState("inicio");
-  const temFornecedores = fornecedores.length > 0;
 
 
 
@@ -135,7 +132,7 @@ function WeddingDashboard() {
           </TabsList>
 
           <TabsContent value="inicio" className="space-y-6">
-            {temFornecedores ? <HeroCard /> : <EmptyState />}
+            <EmptyState />
           </TabsContent>
           <TabsContent value="overview" className="space-y-6">
             <Overview />
