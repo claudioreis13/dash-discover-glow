@@ -7,6 +7,40 @@ interface Settings {
   dataCasamento: string; // ISO yyyy-mm-dd
 }
 
+export type ActivityType = "add" | "update" | "delete" | "pay" | "unpay";
+
+export interface ActivityEntry {
+  id: string;
+  type: ActivityType;
+  description: string;
+  fornecedorNome?: string;
+  timestamp: number;
+}
+
+const ACTIVITY_LIMIT = 30;
+const activityKey = (userId: string) => `wedding_activity_${userId}`;
+
+function loadActivity(userId: string): ActivityEntry[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(activityKey(userId));
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed.slice(0, ACTIVITY_LIMIT) : [];
+  } catch {
+    return [];
+  }
+}
+
+function persistActivity(userId: string, list: ActivityEntry[]) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(activityKey(userId), JSON.stringify(list));
+  } catch {
+    /* ignore */
+  }
+}
+
 interface WeddingStore {
   fornecedores: Fornecedor[];
   orcamentoTotal: number;
@@ -14,6 +48,7 @@ interface WeddingStore {
   settings: Settings;
   hydrated: boolean;
   userId: string | null;
+  activity: ActivityEntry[];
 
   loadForUser: (userId: string) => Promise<void>;
   resetLocal: () => void;
@@ -27,6 +62,8 @@ interface WeddingStore {
   setSettings: (s: Partial<Settings>) => void;
   saveSettings: (settings: Settings, orcamentoTotal: number) => Promise<boolean>;
   toggleDarkMode: () => void;
+  logActivity: (entry: Omit<ActivityEntry, "id" | "timestamp">) => void;
+  clearActivity: () => void;
 }
 
 export function computeStatus(f: Pick<Fornecedor, "parcelas">): StatusType {
