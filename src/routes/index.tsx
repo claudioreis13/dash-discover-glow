@@ -19,6 +19,8 @@ import { useWeddingStore } from "@/store/useWeddingStore";
 import { Overview } from "@/components/wedding/Overview";
 import { FornecedorTable } from "@/components/wedding/FornecedorTable";
 import { Relatorios } from "@/components/wedding/Relatorios";
+import { EmptyState } from "@/components/wedding/EmptyState";
+import { HeroCard } from "@/components/wedding/HeroCard";
 import { format, parseISO, differenceInCalendarDays } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
