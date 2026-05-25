@@ -386,24 +386,14 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => {
   },
 
   setSettings: (s) => {
-    const userId = get().userId;
     set((state) => ({ settings: { ...state.settings, ...s } }));
-    if (userId) {
-      const state = get();
-      void saveUserSettings({
-        data: {
-          noivos: state.settings.noivos || "Casal",
-          dataCasamento: state.settings.dataCasamento,
-          orcamentoTotal: state.orcamentoTotal,
-          darkMode: state.darkMode,
-        },
-      }).catch((e) => console.error("[wedding] setSettings failed", e));
-    }
+    debouncedSaveSettings();
   },
 
   saveSettings: async (nextSettings, nextOrcamentoTotal) => {
     const userId = get().userId;
     if (!userId) return false;
+    cancelPendingSettingsSave();
     const normalizedSettings = {
       noivos: nextSettings.noivos || "Casal",
       dataCasamento: nextSettings.dataCasamento,
@@ -426,22 +416,12 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => {
   },
 
   toggleDarkMode: () => {
-    const userId = get().userId;
     const next = !get().darkMode;
     set({ darkMode: next });
-    if (userId) {
-      const state = get();
-      void saveUserSettings({
-        data: {
-          noivos: state.settings.noivos || "Casal",
-          dataCasamento: state.settings.dataCasamento,
-          orcamentoTotal: state.orcamentoTotal,
-          darkMode: next,
-        },
-      }).catch((e) => console.error("[wedding] toggleDarkMode failed", e));
-    }
+    debouncedSaveSettings();
   },
-}));
+  };
+});
 
 export function totalPago(f: Fornecedor) {
   return f.parcelas.filter((p) => p.pago).reduce((a, p) => a + p.valor, 0);
