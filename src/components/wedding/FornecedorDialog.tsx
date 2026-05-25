@@ -19,7 +19,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, Plus, ShoppingBag, Store } from "lucide-react";
 import {
   CATEGORIA_LABELS,
   type CategoriaType,
@@ -30,6 +29,8 @@ import {
 } from "@/types/wedding";
 import { useWeddingStore } from "@/store/useWeddingStore";
 import { toast } from "sonner";
+import { TipoSwitch } from "./fornecedor/TipoSwitch";
+import { ParcelasEditor } from "./fornecedor/ParcelasEditor";
 
 interface Props {
   open: boolean;
@@ -103,12 +104,7 @@ export function FornecedorDialog({
           contato: "",
           email: "",
           parcelas: [
-            {
-              numero: 1,
-              valor: f.valorTotal || 0,
-              dataPagamento: today(),
-              pago: true,
-            },
+            { numero: 1, valor: f.valorTotal || 0, dataPagamento: today(), pago: true },
           ],
         };
       }
@@ -128,12 +124,7 @@ export function FornecedorDialog({
       ...f,
       parcelas: [
         ...f.parcelas,
-        {
-          numero: f.parcelas.length + 1,
-          valor: 0,
-          dataPagamento: today(),
-          pago: false,
-        },
+        { numero: f.parcelas.length + 1, valor: 0, dataPagamento: today(), pago: false },
       ],
     }));
   };
@@ -141,16 +132,11 @@ export function FornecedorDialog({
   const removeParcela = (idx: number) => {
     setForm((f) => ({
       ...f,
-      parcelas: f.parcelas
-        .filter((_, i) => i !== idx)
-        .map((p, i) => ({ ...p, numero: i + 1 })),
+      parcelas: f.parcelas.filter((_, i) => i !== idx).map((p, i) => ({ ...p, numero: i + 1 })),
     }));
   };
 
-  const somaParcelas = form.parcelas.reduce(
-    (a, p) => a + (Number(p.valor) || 0),
-    0,
-  );
+  const somaParcelas = form.parcelas.reduce((a, p) => a + (Number(p.valor) || 0), 0);
   const sincronizarValor = () => setField("valorTotal", somaParcelas);
 
   const handleSave = () => {
@@ -160,7 +146,6 @@ export function FornecedorDialog({
       );
       return;
     }
-    // For avulso, ensure single parcela mirrors valorTotal
     const parcelas = isAvulso
       ? [
           {
@@ -215,32 +200,7 @@ export function FornecedorDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {!fornecedor && (
-          <div className="flex gap-2 p-1 bg-muted rounded-lg">
-            <button
-              type="button"
-              onClick={() => switchTipo("fornecedor")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                !isAvulso
-                  ? "bg-background shadow-sm text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Store className="w-4 h-4" /> Fornecedor
-            </button>
-            <button
-              type="button"
-              onClick={() => switchTipo("avulso")}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
-                isAvulso
-                  ? "bg-background shadow-sm text-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <ShoppingBag className="w-4 h-4" /> Compra avulsa
-            </button>
-          </div>
-        )}
+        {!fornecedor && <TipoSwitch value={form.tipo} onChange={switchTipo} />}
 
         <div className="grid gap-4 py-2">
           <div className="grid grid-cols-2 gap-3">
@@ -253,9 +213,7 @@ export function FornecedorDialog({
                 value={form.nome}
                 onChange={(e) => setField("nome", e.target.value)}
                 placeholder={
-                  isAvulso
-                    ? "Ex: Sapato da noiva (loja online)"
-                    : "Ex: Buffet do João"
+                  isAvulso ? "Ex: Sapato da noiva (loja online)" : "Ex: Buffet do João"
                 }
               />
             </div>
@@ -282,9 +240,7 @@ export function FornecedorDialog({
                 <Label>Prioridade</Label>
                 <Select
                   value={form.prioridade}
-                  onValueChange={(v) =>
-                    setField("prioridade", v as PrioridadeType)
-                  }
+                  onValueChange={(v) => setField("prioridade", v as PrioridadeType)}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -305,23 +261,19 @@ export function FornecedorDialog({
                   type="number"
                   value={form.valorTotal || ""}
                   placeholder="0"
-                  onChange={(e) =>
-                    setField("valorTotal", Number(e.target.value))
-                  }
+                  onChange={(e) => setField("valorTotal", Number(e.target.value))}
                 />
-                {!isAvulso &&
-                  somaParcelas !== form.valorTotal &&
-                  somaParcelas > 0 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={sincronizarValor}
-                      title={`Igualar à soma das parcelas (${somaParcelas})`}
-                    >
-                      = {somaParcelas}
-                    </Button>
-                  )}
+                {!isAvulso && somaParcelas !== form.valorTotal && somaParcelas > 0 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={sincronizarValor}
+                    title={`Igualar à soma das parcelas (${somaParcelas})`}
+                  >
+                    = {somaParcelas}
+                  </Button>
+                )}
               </div>
             </div>
             {isAvulso ? (
@@ -332,9 +284,7 @@ export function FornecedorDialog({
                     id="dataCompra"
                     type="date"
                     value={form.parcelas[0]?.dataPagamento ?? today()}
-                    onChange={(e) =>
-                      updateParcela(0, { dataPagamento: e.target.value })
-                    }
+                    onChange={(e) => updateParcela(0, { dataPagamento: e.target.value })}
                   />
                 </div>
                 <div className="col-span-2 flex items-center gap-2 rounded-lg border border-border/60 bg-muted/40 px-3 py-2">
@@ -391,103 +341,13 @@ export function FornecedorDialog({
           </div>
 
           {!isAvulso && (
-            <div className="border-t pt-4">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <Label className="text-sm font-semibold">Parcelas</Label>
-                  <p className="text-xs text-muted-foreground">
-                    Soma: R$ {somaParcelas.toLocaleString("pt-BR")}
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  type="button"
-                  onClick={addParcela}
-                >
-                  <Plus className="w-4 h-4 mr-1" /> Adicionar
-                </Button>
-              </div>
-              <div className="space-y-2">
-                {form.parcelas.map((p, idx) => (
-                  <div
-                    key={idx}
-                    className="rounded-lg border border-border/60 bg-muted/30 p-2.5 space-y-2 sm:bg-transparent sm:border-0 sm:p-0 sm:space-y-0 sm:grid sm:grid-cols-[auto_1fr_1fr_auto_auto] sm:gap-2 sm:items-center"
-                  >
-                    {/* Header row on mobile: # + pago + remove */}
-                    <div className="flex items-center justify-between sm:contents">
-                      <span className="text-xs font-medium text-muted-foreground sm:w-6">
-                        Parcela #{p.numero}
-                      </span>
-                      <div className="flex items-center gap-1 sm:contents">
-                        <label
-                          className="flex items-center gap-1.5 text-xs cursor-pointer sm:order-2"
-                          htmlFor={`pago-${idx}`}
-                        >
-                          <Checkbox
-                            id={`pago-${idx}`}
-                            checked={p.pago}
-                            onCheckedChange={(v) =>
-                              updateParcela(idx, { pago: !!v })
-                            }
-                          />
-                          pago
-                        </label>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          type="button"
-                          onClick={() => removeParcela(idx)}
-                          disabled={form.parcelas.length === 1}
-                          aria-label="Remover parcela"
-                          className="h-8 w-8 sm:order-3"
-                        >
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </div>
-                    {/* Inputs row */}
-                    <div className="grid grid-cols-2 gap-2 sm:contents">
-                      <div className="sm:contents">
-                        <Label
-                          htmlFor={`valor-${idx}`}
-                          className="text-[10px] uppercase tracking-wide text-muted-foreground sm:sr-only"
-                        >
-                          Valor (R$)
-                        </Label>
-                        <Input
-                          id={`valor-${idx}`}
-                          type="number"
-                          inputMode="decimal"
-                          placeholder="0,00"
-                          value={p.valor || ""}
-                          onChange={(e) =>
-                            updateParcela(idx, { valor: Number(e.target.value) })
-                          }
-                        />
-                      </div>
-                      <div className="sm:contents">
-                        <Label
-                          htmlFor={`data-${idx}`}
-                          className="text-[10px] uppercase tracking-wide text-muted-foreground sm:sr-only"
-                        >
-                          Data
-                        </Label>
-                        <Input
-                          id={`data-${idx}`}
-                          type="date"
-                          value={p.dataPagamento}
-                          onChange={(e) =>
-                            updateParcela(idx, { dataPagamento: e.target.value })
-                          }
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-            </div>
+            <ParcelasEditor
+              parcelas={form.parcelas}
+              somaParcelas={somaParcelas}
+              onUpdate={updateParcela}
+              onAdd={addParcela}
+              onRemove={removeParcela}
+            />
           )}
         </div>
 
