@@ -1,12 +1,24 @@
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Moon, Sun, Settings, LogOut, Home, LayoutDashboard, Users, FileBarChart } from "lucide-react";
+import {
+  Moon,
+  Settings,
+  LogOut,
+  Home,
+  LayoutDashboard,
+  Users,
+  FileBarChart,
+  Heart,
+  ChevronRight,
+  ShieldCheck,
+} from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useWeddingStore } from "@/store/useWeddingStore";
@@ -136,84 +148,197 @@ function WeddingDashboard() {
           <div className="order-1 sm:order-2 flex items-center justify-end gap-1 sm:absolute sm:right-4 md:right-6 sm:top-1/2 sm:-translate-y-1/2">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Configurações">
-                  <Settings className="w-4 h-4" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-10 w-10 rounded-full bg-sage/15 hover:bg-sage/25 text-foreground border border-sage/30 shadow-sm transition-colors"
+                  aria-label="Abrir menu de opções"
+                >
+                  <Settings className="w-[18px] h-[18px]" strokeWidth={1.8} />
                 </Button>
               </PopoverTrigger>
               <PopoverContent
                 align="end"
-                sideOffset={8}
-                className="w-[calc(100vw-1.5rem)] sm:w-72 space-y-3"
+                sideOffset={10}
+                className="w-[min(calc(100vw-1.5rem),360px)] p-0 overflow-hidden rounded-2xl border-border/70 shadow-xl"
               >
-                <form onSubmit={handleSaveSettings} className="space-y-3">
-                  <div>
-                    <Label htmlFor="noivos">Noivos</Label>
-                    <Input
-                      id="noivos"
-                      value={settingsDraft.noivos}
-                      onChange={(e) =>
-                        setSettingsDraft((current) => ({
-                          ...current,
-                          noivos: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="data">Data do casamento</Label>
-                    <Input
-                      id="data"
-                      type="date"
-                      min={today}
-                      max="2100-12-31"
-                      value={settingsDraft.dataCasamento}
-                      onChange={(e) =>
-                        setSettingsDraft((current) => ({
-                          ...current,
-                          dataCasamento: e.target.value,
-                        }))
-                      }
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="orc">Orçamento total (R$)</Label>
-                    <Input
-                      id="orc"
-                      type="number"
-                      inputMode="decimal"
-                      value={orcamentoDraft}
-                      onChange={(e) => setOrcamentoDraft(e.target.value)}
-                    />
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isSavingSettings}>
-                    {isSavingSettings ? "Salvando..." : "Salvar"}
-                  </Button>
-                </form>
-                {isAdmin && userId && (
-                  <div className="pt-2 border-t border-border">
-                    <AdminUsersDialog currentUserId={userId} />
-                  </div>
-                )}
+                {/* Header */}
+                <div className="px-5 py-4 border-b border-border/60 bg-card">
+                  <h2 className="font-serif text-2xl font-semibold text-foreground leading-tight">
+                    Configurações
+                  </h2>
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-sage font-semibold mt-1">
+                    Personalize sua experiência
+                  </p>
+                </div>
+
+                <div className="px-5 py-5 space-y-6 max-h-[min(75vh,560px)] overflow-y-auto">
+                  {/* Section: Casamento */}
+                  <section className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="w-1 h-4 bg-sage rounded-full" />
+                      <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide flex items-center gap-1.5">
+                        <Heart className="w-3 h-3 text-sage" />
+                        Casamento
+                      </h3>
+                    </div>
+
+                    <form onSubmit={handleSaveSettings} className="space-y-3">
+                      <div className="space-y-1.5">
+                        <Label
+                          htmlFor="noivos"
+                          className="text-[10px] font-medium text-sage uppercase tracking-wider ml-1"
+                        >
+                          Nomes do Casal
+                        </Label>
+                        <Input
+                          id="noivos"
+                          value={settingsDraft.noivos}
+                          onChange={(e) =>
+                            setSettingsDraft((current) => ({
+                              ...current,
+                              noivos: e.target.value,
+                            }))
+                          }
+                          className="h-10 rounded-xl bg-muted/40 border-border/60 focus-visible:ring-sage/40 focus-visible:border-sage"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                          <Label
+                            htmlFor="data"
+                            className="text-[10px] font-medium text-sage uppercase tracking-wider ml-1"
+                          >
+                            Data
+                          </Label>
+                          <Input
+                            id="data"
+                            type="date"
+                            min={today}
+                            max="2100-12-31"
+                            value={settingsDraft.dataCasamento}
+                            onChange={(e) =>
+                              setSettingsDraft((current) => ({
+                                ...current,
+                                dataCasamento: e.target.value,
+                              }))
+                            }
+                            className="h-10 rounded-xl bg-muted/40 border-border/60 focus-visible:ring-sage/40 focus-visible:border-sage px-3"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label
+                            htmlFor="orc"
+                            className="text-[10px] font-medium text-sage uppercase tracking-wider ml-1"
+                          >
+                            Orçamento
+                          </Label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[10px] font-semibold text-sage pointer-events-none">
+                              R$
+                            </span>
+                            <Input
+                              id="orc"
+                              type="number"
+                              inputMode="decimal"
+                              value={orcamentoDraft}
+                              onChange={(e) => setOrcamentoDraft(e.target.value)}
+                              className="h-10 rounded-xl bg-muted/40 border-border/60 focus-visible:ring-sage/40 focus-visible:border-sage pl-8"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <Button
+                        type="submit"
+                        disabled={isSavingSettings}
+                        className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-md shadow-primary/10 transition-all active:scale-[0.98]"
+                      >
+                        {isSavingSettings ? "Salvando..." : "Salvar alterações"}
+                      </Button>
+                    </form>
+                  </section>
+
+                  {/* Section: Preferências */}
+                  <section className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="w-1 h-4 bg-sage rounded-full" />
+                      <h3 className="text-xs font-semibold text-foreground uppercase tracking-wide">
+                        Preferências
+                      </h3>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label
+                        htmlFor="dark-mode-switch"
+                        className="flex items-center justify-between p-3 bg-muted/40 rounded-xl border border-border/60 cursor-pointer hover:bg-muted/60 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 bg-card rounded-lg shadow-sm text-sage border border-border/40">
+                            <Moon className="w-4 h-4" strokeWidth={1.8} />
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium text-foreground leading-tight">
+                              Modo escuro
+                            </span>
+                            <span className="text-[11px] text-muted-foreground">
+                              Reduz o brilho da interface
+                            </span>
+                          </div>
+                        </div>
+                        <Switch
+                          id="dark-mode-switch"
+                          checked={darkMode}
+                          onCheckedChange={toggleDarkMode}
+                          aria-label="Alternar modo escuro"
+                        />
+                      </label>
+
+                      {isAdmin && userId && (
+                        <AdminUsersDialog
+                          currentUserId={userId}
+                          trigger={
+                            <button
+                              type="button"
+                              className="w-full flex items-center justify-between p-3 bg-muted/40 rounded-xl border border-border/60 hover:bg-muted/60 transition-colors text-left cursor-pointer group"
+                            >
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 bg-card rounded-lg shadow-sm text-sage border border-border/40">
+                                  <Users className="w-4 h-4" strokeWidth={1.8} />
+                                </div>
+                                <div className="flex flex-col">
+                                  <span className="text-sm font-medium text-foreground leading-tight">
+                                    Gerenciar usuários
+                                  </span>
+                                  <span className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
+                                    <ShieldCheck className="w-2.5 h-2.5" />
+                                    Apenas administradores
+                                  </span>
+                                </div>
+                              </div>
+                              <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+                            </button>
+                          }
+                        />
+                      )}
+                    </div>
+                  </section>
+                </div>
+
+                {/* Footer: Logout */}
+                <div className="px-5 py-3 bg-muted/30 border-t border-border/60">
+                  <button
+                    type="button"
+                    onClick={() => void supabase.auth.signOut()}
+                    className="w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold text-destructive hover:bg-destructive/10 rounded-lg transition-colors cursor-pointer"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Encerrar sessão
+                  </button>
+                </div>
               </PopoverContent>
             </Popover>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9"
-              onClick={toggleDarkMode}
-              aria-label="Alternar tema"
-            >
-              {darkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9"
-              onClick={() => void supabase.auth.signOut()}
-              aria-label="Sair"
-            >
-              <LogOut className="w-4 h-4" />
-            </Button>
           </div>
         </div>
       </header>
