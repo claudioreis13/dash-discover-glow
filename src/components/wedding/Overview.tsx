@@ -14,11 +14,13 @@ import { HeroCard } from "./HeroCard";
 import { ActivityFeed } from "./ActivityFeed";
 import { PaymentCalendar } from "./PaymentCalendar";
 import { SectionHeader } from "./SectionHeader";
+import { ParcelStrip } from "./ParcelStrip";
 import {
   formatCurrency,
   useFinancialCalculations,
 } from "@/hooks/useFinancialCalculations";
 import { useWeddingStore } from "@/store/useWeddingStore";
+import type { CategoriaType } from "@/types/wedding";
 
 const formatPct = (n: number) => `${n.toFixed(1)}%`;
 
