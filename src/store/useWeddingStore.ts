@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { toast } from "sonner";
 import type { Fornecedor, StatusType } from "@/types/wedding";
 import {
   loadWeddingData,
@@ -8,6 +9,12 @@ import {
   updateFornecedorParcelas,
   saveUserSettings,
 } from "@/lib/wedding.functions";
+
+function extractErrorMessage(e: unknown, fallback: string): string {
+  if (e instanceof Error && e.message) return e.message;
+  if (typeof e === "string") return e;
+  return fallback;
+}
 
 interface Settings {
   noivos: string;
