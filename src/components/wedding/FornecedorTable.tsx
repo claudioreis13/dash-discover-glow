@@ -41,6 +41,7 @@ import {
   Trash2,
   MoreVertical,
   Plus,
+  ShoppingBag,
   Search,
   ChevronDown,
   ChevronRight,
@@ -55,6 +56,7 @@ import {
   type CategoriaType,
   type Fornecedor,
   type StatusType,
+  type TipoLancamento,
 } from "@/types/wedding";
 import { FornecedorDialog } from "./FornecedorDialog";
 import { format, parseISO } from "date-fns";
@@ -78,6 +80,7 @@ export function FornecedorTable() {
   );
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Fornecedor | null>(null);
+  const [dialogTipo, setDialogTipo] = useState<TipoLancamento>("fornecedor");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [toDelete, setToDelete] = useState<Fornecedor | null>(null);
 
@@ -91,12 +94,14 @@ export function FornecedorTable() {
     });
   }, [fornecedores, search, filterCat, filterStatus]);
 
-  const openNew = () => {
+  const openNew = (tipo: TipoLancamento = "fornecedor") => {
     setEditing(null);
+    setDialogTipo(tipo);
     setDialogOpen(true);
   };
   const openEdit = (f: Fornecedor) => {
     setEditing(f);
+    setDialogTipo(f.tipo ?? "fornecedor");
     setDialogOpen(true);
   };
 
@@ -168,9 +173,14 @@ export function FornecedorTable() {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={openNew}>
-            <Plus className="w-4 h-4 mr-1" /> Novo fornecedor
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => openNew("avulso")}>
+              <ShoppingBag className="w-4 h-4 mr-1" /> Compra avulsa
+            </Button>
+            <Button onClick={() => openNew("fornecedor")}>
+              <Plus className="w-4 h-4 mr-1" /> Novo fornecedor
+            </Button>
+          </div>
         </div>
 
         <div className="rounded-lg border border-border/60 overflow-hidden">
@@ -327,6 +337,7 @@ export function FornecedorTable() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         fornecedor={editing}
+        defaultTipo={dialogTipo}
       />
 
       <AlertDialog

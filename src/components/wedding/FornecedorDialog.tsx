@@ -19,13 +19,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, ShoppingBag, Store } from "lucide-react";
 import {
   CATEGORIA_LABELS,
   type CategoriaType,
   type Fornecedor,
   type Parcela,
   type PrioridadeType,
+  type TipoLancamento,
 } from "@/types/wedding";
 import { useWeddingStore } from "@/store/useWeddingStore";
 import { toast } from "sonner";
@@ -35,14 +36,19 @@ interface Props {
   onOpenChange: (open: boolean) => void;
   fornecedor?: Fornecedor | null;
   defaultCategoria?: CategoriaType;
+  defaultTipo?: TipoLancamento;
 }
 
 const today = () => new Date().toISOString().split("T")[0];
 
-function makeEmpty(categoria: CategoriaType = "festa") {
+function makeEmpty(
+  categoria: CategoriaType = "festa",
+  tipo: TipoLancamento = "fornecedor",
+) {
+  const isAvulso = tipo === "avulso";
   return {
     nome: "",
-    categoria,
+    categoria: isAvulso ? ("avulso" as CategoriaType) : categoria,
     valorTotal: 0,
     dataCont: today(),
     vencimento: today(),
@@ -50,8 +56,9 @@ function makeEmpty(categoria: CategoriaType = "festa") {
     observacoes: "",
     contato: "",
     email: "",
+    tipo,
     parcelas: [
-      { numero: 1, valor: 0, dataPagamento: today(), pago: false },
+      { numero: 1, valor: 0, dataPagamento: today(), pago: isAvulso },
     ] as Parcela[],
   };
 }
@@ -61,21 +68,53 @@ export function FornecedorDialog({
   onOpenChange,
   fornecedor,
   defaultCategoria,
+  defaultTipo,
 }: Props) {
   const { addFornecedor, updateFornecedor } = useWeddingStore();
   const [form, setForm] = useState(() =>
-    fornecedor ? { ...fornecedor } : makeEmpty(defaultCategoria),
+    fornecedor
+      ? { ...fornecedor, tipo: fornecedor.tipo ?? "fornecedor" }
+      : makeEmpty(defaultCategoria, defaultTipo),
   );
 
-  // Reset whenever dialog opens or target changes
   useEffect(() => {
     if (open) {
-      setForm(fornecedor ? { ...fornecedor } : makeEmpty(defaultCategoria));
+      setForm(
+        fornecedor
+          ? { ...fornecedor, tipo: fornecedor.tipo ?? "fornecedor" }
+          : makeEmpty(defaultCategoria, defaultTipo),
+      );
     }
-  }, [open, fornecedor, defaultCategoria]);
+  }, [open, fornecedor, defaultCategoria, defaultTipo]);
+
+  const isAvulso = form.tipo === "avulso";
 
   const setField = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
+
+  const switchTipo = (tipo: TipoLancamento) => {
+    if (tipo === form.tipo) return;
+    setForm((f) => {
+      if (tipo === "avulso") {
+        return {
+          ...f,
+          tipo,
+          categoria: "avulso" as CategoriaType,
+          contato: "",
+          email: "",
+          parcelas: [
+            {
+              numero: 1,
+              valor: f.valorTotal || 0,
+              dataPagamento: today(),
+              pago: true,
+            },
+          ],
+        };
+      }
+      return { ...f, tipo };
+    });
+  };
 
   const updateParcela = (idx: number, patch: Partial<Parcela>) => {
     setForm((f) => ({
@@ -116,30 +155,42 @@ export function FornecedorDialog({
 
   const handleSave = () => {
     if (!form.nome.trim()) {
-      toast.error("Informe o nome do fornecedor");
+      toast.error(
+        isAvulso ? "Informe a descrição da compra" : "Informe o nome do fornecedor",
+      );
       return;
     }
+    // For avulso, ensure single parcela mirrors valorTotal
+    const parcelas = isAvulso
+      ? [
+          {
+            numero: 1,
+            valor: Number(form.valorTotal) || 0,
+            dataPagamento: form.parcelas[0]?.dataPagamento ?? today(),
+            pago: form.parcelas[0]?.pago ?? true,
+          },
+        ]
+      : form.parcelas.map((p) => ({ ...p, valor: Number(p.valor) || 0 }));
+
     const payload = {
       nome: form.nome.trim(),
       categoria: form.categoria,
       valorTotal: Number(form.valorTotal) || 0,
       dataCont: form.dataCont,
-      vencimento: form.vencimento,
+      vencimento: isAvulso ? parcelas[0].dataPagamento : form.vencimento,
       prioridade: form.prioridade,
       observacoes: form.observacoes,
-      contato: form.contato,
-      email: form.email,
-      parcelas: form.parcelas.map((p) => ({
-        ...p,
-        valor: Number(p.valor) || 0,
-      })),
+      contato: isAvulso ? "" : form.contato,
+      email: isAvulso ? "" : form.email,
+      tipo: form.tipo,
+      parcelas,
     };
     if (fornecedor) {
       updateFornecedor(fornecedor.id, payload);
-      toast.success("Fornecedor atualizado");
+      toast.success(isAvulso ? "Compra atualizada" : "Fornecedor atualizado");
     } else {
       addFornecedor({ ...payload, status: "pendente" });
-      toast.success("Fornecedor adicionado");
+      toast.success(isAvulso ? "Compra adicionada" : "Fornecedor adicionado");
     }
     onOpenChange(false);
   };
@@ -149,22 +200,63 @@ export function FornecedorDialog({
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {fornecedor ? "Editar fornecedor" : "Novo fornecedor"}
+            {fornecedor
+              ? isAvulso
+                ? "Editar compra"
+                : "Editar fornecedor"
+              : isAvulso
+                ? "Nova compra avulsa"
+                : "Novo fornecedor"}
           </DialogTitle>
           <DialogDescription>
-            Cadastre o contrato, parcelas e datas de vencimento.
+            {isAvulso
+              ? "Registre uma compra única ou online sem contrato — ideal para itens pequenos."
+              : "Cadastre o contrato, parcelas e datas de vencimento."}
           </DialogDescription>
         </DialogHeader>
+
+        {!fornecedor && (
+          <div className="flex gap-2 p-1 bg-muted rounded-lg">
+            <button
+              type="button"
+              onClick={() => switchTipo("fornecedor")}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                !isAvulso
+                  ? "bg-background shadow-sm text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Store className="w-4 h-4" /> Fornecedor
+            </button>
+            <button
+              type="button"
+              onClick={() => switchTipo("avulso")}
+              className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                isAvulso
+                  ? "bg-background shadow-sm text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <ShoppingBag className="w-4 h-4" /> Compra avulsa
+            </button>
+          </div>
+        )}
 
         <div className="grid gap-4 py-2">
           <div className="grid grid-cols-2 gap-3">
             <div className="col-span-2">
-              <Label htmlFor="nome">Nome do fornecedor</Label>
+              <Label htmlFor="nome">
+                {isAvulso ? "Descrição da compra" : "Nome do fornecedor"}
+              </Label>
               <Input
                 id="nome"
                 value={form.nome}
                 onChange={(e) => setField("nome", e.target.value)}
-                placeholder="Ex: Buffet do João"
+                placeholder={
+                  isAvulso
+                    ? "Ex: Sapato da noiva (loja online)"
+                    : "Ex: Buffet do João"
+                }
               />
             </div>
             <div>
@@ -185,26 +277,28 @@ export function FornecedorDialog({
                 </SelectContent>
               </Select>
             </div>
+            {!isAvulso && (
+              <div>
+                <Label>Prioridade</Label>
+                <Select
+                  value={form.prioridade}
+                  onValueChange={(v) =>
+                    setField("prioridade", v as PrioridadeType)
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="alta">Alta</SelectItem>
+                    <SelectItem value="média">Média</SelectItem>
+                    <SelectItem value="baixa">Baixa</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div>
-              <Label>Prioridade</Label>
-              <Select
-                value={form.prioridade}
-                onValueChange={(v) =>
-                  setField("prioridade", v as PrioridadeType)
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="alta">Alta</SelectItem>
-                  <SelectItem value="média">Média</SelectItem>
-                  <SelectItem value="baixa">Baixa</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="valor">Valor total (R$)</Label>
+              <Label htmlFor="valor">Valor {isAvulso ? "" : "total "}(R$)</Label>
               <div className="flex gap-2">
                 <Input
                   id="valor"
@@ -215,122 +309,157 @@ export function FornecedorDialog({
                     setField("valorTotal", Number(e.target.value))
                   }
                 />
-                {somaParcelas !== form.valorTotal && somaParcelas > 0 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={sincronizarValor}
-                    title={`Igualar à soma das parcelas (${somaParcelas})`}
-                  >
-                    = {somaParcelas}
-                  </Button>
-                )}
+                {!isAvulso &&
+                  somaParcelas !== form.valorTotal &&
+                  somaParcelas > 0 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={sincronizarValor}
+                      title={`Igualar à soma das parcelas (${somaParcelas})`}
+                    >
+                      = {somaParcelas}
+                    </Button>
+                  )}
               </div>
             </div>
-            <div>
-              <Label htmlFor="venc">Vencimento final</Label>
-              <Input
-                id="venc"
-                type="date"
-                value={form.vencimento}
-                onChange={(e) => setField("vencimento", e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="contato">Contato</Label>
-              <Input
-                id="contato"
-                value={form.contato}
-                onChange={(e) => setField("contato", e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                value={form.email}
-                onChange={(e) => setField("email", e.target.value)}
-              />
-            </div>
+            {isAvulso ? (
+              <>
+                <div>
+                  <Label htmlFor="dataCompra">Data da compra</Label>
+                  <Input
+                    id="dataCompra"
+                    type="date"
+                    value={form.parcelas[0]?.dataPagamento ?? today()}
+                    onChange={(e) =>
+                      updateParcela(0, { dataPagamento: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="col-span-2 flex items-center gap-2 rounded-lg border border-border/60 bg-muted/40 px-3 py-2">
+                  <Checkbox
+                    id="pagoAvulso"
+                    checked={form.parcelas[0]?.pago ?? true}
+                    onCheckedChange={(v) => updateParcela(0, { pago: !!v })}
+                  />
+                  <Label htmlFor="pagoAvulso" className="text-sm cursor-pointer">
+                    Já paguei esta compra
+                  </Label>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <Label htmlFor="venc">Vencimento final</Label>
+                  <Input
+                    id="venc"
+                    type="date"
+                    value={form.vencimento}
+                    onChange={(e) => setField("vencimento", e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="contato">Contato</Label>
+                  <Input
+                    id="contato"
+                    value={form.contato}
+                    onChange={(e) => setField("contato", e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    value={form.email}
+                    onChange={(e) => setField("email", e.target.value)}
+                  />
+                </div>
+              </>
+            )}
             <div className="col-span-2">
               <Label htmlFor="obs">Observações</Label>
               <Textarea
                 id="obs"
                 value={form.observacoes}
                 onChange={(e) => setField("observacoes", e.target.value)}
+                placeholder={
+                  isAvulso ? "Link do produto, loja, código do pedido..." : ""
+                }
               />
             </div>
           </div>
 
-          <div className="border-t pt-4">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <Label className="text-sm font-semibold">Parcelas</Label>
-                <p className="text-xs text-muted-foreground">
-                  Soma: R$ {somaParcelas.toLocaleString("pt-BR")}
-                </p>
-              </div>
-              <Button
-                size="sm"
-                variant="outline"
-                type="button"
-                onClick={addParcela}
-              >
-                <Plus className="w-4 h-4 mr-1" /> Adicionar
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {form.parcelas.map((p, idx) => (
-                <div
-                  key={idx}
-                  className="grid grid-cols-[auto_1fr_1fr_auto_auto] gap-2 items-center"
+          {!isAvulso && (
+            <div className="border-t pt-4">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <Label className="text-sm font-semibold">Parcelas</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Soma: R$ {somaParcelas.toLocaleString("pt-BR")}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  type="button"
+                  onClick={addParcela}
                 >
-                  <span className="text-xs text-muted-foreground w-6">
-                    #{p.numero}
-                  </span>
-                  <Input
-                    type="number"
-                    placeholder="Valor"
-                    value={p.valor || ""}
-                    onChange={(e) =>
-                      updateParcela(idx, { valor: Number(e.target.value) })
-                    }
-                  />
-                  <Input
-                    type="date"
-                    value={p.dataPagamento}
-                    onChange={(e) =>
-                      updateParcela(idx, { dataPagamento: e.target.value })
-                    }
-                  />
-                  <label
-                    className="flex items-center gap-1 text-xs"
-                    htmlFor={`pago-${idx}`}
+                  <Plus className="w-4 h-4 mr-1" /> Adicionar
+                </Button>
+              </div>
+              <div className="space-y-2">
+                {form.parcelas.map((p, idx) => (
+                  <div
+                    key={idx}
+                    className="grid grid-cols-[auto_1fr_1fr_auto_auto] gap-2 items-center"
                   >
-                    <Checkbox
-                      id={`pago-${idx}`}
-                      checked={p.pago}
-                      onCheckedChange={(v) =>
-                        updateParcela(idx, { pago: !!v })
+                    <span className="text-xs text-muted-foreground w-6">
+                      #{p.numero}
+                    </span>
+                    <Input
+                      type="number"
+                      placeholder="Valor"
+                      value={p.valor || ""}
+                      onChange={(e) =>
+                        updateParcela(idx, { valor: Number(e.target.value) })
                       }
                     />
-                    pago
-                  </label>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    type="button"
-                    onClick={() => removeParcela(idx)}
-                    disabled={form.parcelas.length === 1}
-                    aria-label="Remover parcela"
-                  >
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </Button>
-                </div>
-              ))}
+                    <Input
+                      type="date"
+                      value={p.dataPagamento}
+                      onChange={(e) =>
+                        updateParcela(idx, { dataPagamento: e.target.value })
+                      }
+                    />
+                    <label
+                      className="flex items-center gap-1 text-xs"
+                      htmlFor={`pago-${idx}`}
+                    >
+                      <Checkbox
+                        id={`pago-${idx}`}
+                        checked={p.pago}
+                        onCheckedChange={(v) =>
+                          updateParcela(idx, { pago: !!v })
+                        }
+                      />
+                      pago
+                    </label>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      type="button"
+                      onClick={() => removeParcela(idx)}
+                      disabled={form.parcelas.length === 1}
+                      aria-label="Remover parcela"
+                    >
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <DialogFooter>
@@ -338,7 +467,11 @@ export function FornecedorDialog({
             Cancelar
           </Button>
           <Button onClick={handleSave}>
-            {fornecedor ? "Salvar alterações" : "Adicionar fornecedor"}
+            {fornecedor
+              ? "Salvar alterações"
+              : isAvulso
+                ? "Adicionar compra"
+                : "Adicionar fornecedor"}
           </Button>
         </DialogFooter>
       </DialogContent>
