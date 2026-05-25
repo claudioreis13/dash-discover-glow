@@ -56,6 +56,7 @@ import {
   type CategoriaType,
   type Fornecedor,
   type StatusType,
+  type TipoLancamento,
 } from "@/types/wedding";
 import { FornecedorDialog } from "./FornecedorDialog";
 import { format, parseISO } from "date-fns";
