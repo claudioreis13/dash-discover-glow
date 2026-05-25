@@ -368,7 +368,7 @@ function WeddingDashboard() {
         </Tabs>
       </main>
 
-      <QuickAddButton />
+      {(tab === "overview" || tab === "fornecedores") && <QuickAddButton />}
     </div>
   );
 }
