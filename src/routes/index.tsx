@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Heart, Moon, Sun, Settings } from "lucide-react";
+import { Moon, Sun, Settings } from "lucide-react";
 import {
   Tabs,
   TabsContent,
@@ -21,8 +21,6 @@ import { FornecedorTable } from "@/components/wedding/FornecedorTable";
 import { Relatorios } from "@/components/wedding/Relatorios";
 import { EmptyState } from "@/components/wedding/EmptyState";
 import { HeroCard } from "@/components/wedding/HeroCard";
-import { format, parseISO, differenceInCalendarDays } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -56,11 +54,7 @@ function WeddingDashboard() {
   const [tab, setTab] = useState("inicio");
   const temFornecedores = fornecedores.length > 0;
 
-  const data = parseISO(settings.dataCasamento);
-  const [diasRestantes, setDiasRestantes] = useState<number | null>(null);
-  useEffect(() => {
-    setDiasRestantes(differenceInCalendarDays(data, new Date()));
-  }, [data]);
+
 
   return (
     <div className="min-h-screen bg-background">
