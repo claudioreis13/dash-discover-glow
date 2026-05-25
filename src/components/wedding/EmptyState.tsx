@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import {
@@ -74,10 +74,11 @@ export function EmptyState() {
 
   const { settings } = useWeddingStore();
   const dataCasamento = parseISO(settings.dataCasamento);
-  const dias = Math.max(
-    0,
-    differenceInCalendarDays(dataCasamento, new Date()),
-  );
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const dias = mounted
+    ? Math.max(0, differenceInCalendarDays(dataCasamento, new Date()))
+    : 0;
 
   const start = (categoria?: CategoriaType) => {
     setCat(categoria);
@@ -111,8 +112,11 @@ export function EmptyState() {
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-md mx-auto leading-relaxed">
             O grande dia está a{" "}
-            <span className="text-[var(--warning)] font-semibold tabular-nums">
-              {dias} dias
+            <span
+              className="text-[var(--warning)] font-semibold tabular-nums"
+              suppressHydrationWarning
+            >
+              {mounted ? `${dias} dias` : "…"}
             </span>{" "}
             de distância. Vamos tornar o planejamento tão especial quanto a
             festa?
