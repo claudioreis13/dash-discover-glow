@@ -12,13 +12,15 @@ import { BudgetDonut } from "./BudgetDonut";
 import { PaymentTimeline } from "./PaymentTimeline";
 import { HeroCard } from "./HeroCard";
 import { ActivityFeed } from "./ActivityFeed";
-
 import { PaymentCalendar } from "./PaymentCalendar";
+import { SectionHeader } from "./SectionHeader";
 import {
   formatCurrency,
   useFinancialCalculations,
 } from "@/hooks/useFinancialCalculations";
 import { useWeddingStore } from "@/store/useWeddingStore";
+
+const formatPct = (n: number) => `${n.toFixed(1)}%`;
 
 export function Overview() {
   const fornecedores = useWeddingStore((s) => s.fornecedores);
@@ -27,7 +29,7 @@ export function Overview() {
 
   if (fornecedores.length === 0) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-8">
         <HeroCard />
         <Card className="p-10 text-center text-sm text-muted-foreground border-dashed">
           Nenhum fornecedor cadastrado ainda. Vá para a aba{" "}
@@ -38,90 +40,121 @@ export function Overview() {
     );
   }
 
+  const pctPago =
+    dashboard.valorComprometido > 0
+      ? (dashboard.valorPago / dashboard.valorComprometido) * 100
+      : 0;
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       <HeroCard />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          label="Total contratado"
-          valor={formatCurrency(dashboard.valorComprometido)}
-          icon={<FileSignature className="w-4 h-4" />}
-          tone="default"
-          hint={`${dashboard.contratosTotal} ${dashboard.contratosTotal === 1 ? "lançamento" : "lançamentos"}`}
-          delay={0}
+      {/* ───────────── Finanças ───────────── */}
+      <section className="space-y-5">
+        <SectionHeader
+          kicker="Finanças"
+          title="Resumo financeiro"
+          hint={`${dashboard.contratosTotal} ${dashboard.contratosTotal === 1 ? "fornecedor" : "fornecedores"}`}
         />
-        <MetricCard
-          label="Já pago"
-          valor={formatCurrency(dashboard.valorPago)}
-          icon={<CheckCircle2 className="w-4 h-4" />}
-          tone="success"
-          hint={
-            dashboard.valorComprometido > 0
-              ? `${((dashboard.valorPago / dashboard.valorComprometido) * 100).toFixed(0)}% do contratado`
-              : undefined
-          }
-          delay={0.05}
-        />
-        <MetricCard
-          label="A pagar"
-          valor={formatCurrency(dashboard.valorPendente)}
-          icon={<Clock className="w-4 h-4" />}
-          tone="warning"
-          hint={`${proximasParcelas.length} ${proximasParcelas.length === 1 ? "parcela pendente" : "parcelas pendentes"}`}
-          delay={0.1}
-        />
-        <MetricCard
-          label="% do orçamento usado"
-          valor={`${dashboard.percentualUtilizado.toFixed(1)}%`}
-          icon={<TrendingUp className="w-4 h-4" />}
-          tone={dashboard.percentualUtilizado > 100 ? "destructive" : "accent"}
-          hint={
-            dashboard.percentualUtilizado > 100
-              ? `Estourou em ${formatCurrency(Math.abs(dashboard.saldoRestante))}`
-              : `Restam ${formatCurrency(dashboard.saldoRestante)}`
-          }
-          delay={0.15}
-        />
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <BudgetDonut
-            data={gastosPorCategoria.map((g) => ({
-              label: g.label,
-              value: g.total,
-            }))}
-            orcamentoTotal={dashboard.orcamentoTotal}
-            comprometido={dashboard.valorComprometido}
+        {/* Bento: 4 stat cards + donut spanning 2 cols on the right */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <MetricCard
+            label="Total contratado"
+            numeric={dashboard.valorComprometido}
+            formatValor={formatCurrency}
+            icon={<FileSignature className="w-4 h-4" />}
+            tone="default"
+            hint={`${dashboard.contratosTotal} ${dashboard.contratosTotal === 1 ? "lançamento" : "lançamentos"}`}
+            delay={0}
+          />
+          <MetricCard
+            label="Já pago"
+            numeric={dashboard.valorPago}
+            formatValor={formatCurrency}
+            icon={<CheckCircle2 className="w-4 h-4" />}
+            tone="success"
+            hint={
+              dashboard.valorComprometido > 0
+                ? `${pctPago.toFixed(0)}% do contratado`
+                : undefined
+            }
+            delay={0.05}
+          />
+          <MetricCard
+            label="A pagar"
+            numeric={dashboard.valorPendente}
+            formatValor={formatCurrency}
+            icon={<Clock className="w-4 h-4" />}
+            tone="warning"
+            hint={`${proximasParcelas.length} ${proximasParcelas.length === 1 ? "parcela pendente" : "parcelas pendentes"}`}
+            delay={0.1}
+          />
+          <MetricCard
+            label="% do orçamento"
+            numeric={dashboard.percentualUtilizado}
+            formatValor={formatPct}
+            icon={<TrendingUp className="w-4 h-4" />}
+            tone={dashboard.percentualUtilizado > 100 ? "destructive" : "accent"}
+            hint={
+              dashboard.percentualUtilizado > 100
+                ? `Estourou em ${formatCurrency(Math.abs(dashboard.saldoRestante))}`
+                : `Restam ${formatCurrency(dashboard.saldoRestante)}`
+            }
+            delay={0.15}
           />
         </div>
-        <PaymentTimeline items={proximasParcelas} />
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2">
-          <PaymentCalendar />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <BudgetDonut
+              data={gastosPorCategoria.map((g) => ({
+                label: g.label,
+                value: g.total,
+              }))}
+              orcamentoTotal={dashboard.orcamentoTotal}
+              comprometido={dashboard.valorComprometido}
+            />
+          </div>
+          <PaymentTimeline items={proximasParcelas} />
         </div>
-        <ActivityFeed />
-      </div>
+      </section>
 
+      {/* ───────────── Cronograma ───────────── */}
+      <section className="space-y-5">
+        <SectionHeader
+          kicker="Cronograma"
+          title="Pagamentos & atividade"
+          hint={`${proximasParcelas.length} ${proximasParcelas.length === 1 ? "próxima parcela" : "próximas parcelas"}`}
+        />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <PaymentCalendar />
+          </div>
+          <ActivityFeed />
+        </div>
+      </section>
 
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-      >
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">
-            Gastos por categoria
-          </h3>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {gastosPorCategoria.map((g) => (
-              <div
-                key={g.categoria}
-                className="p-4 rounded-xl border border-border/60 bg-card"
-              >
+      {/* ───────────── Categorias ───────────── */}
+      <section className="space-y-5">
+        <SectionHeader
+          kicker="Categorias"
+          title="Gastos por categoria"
+          hint={`${gastosPorCategoria.length} ${gastosPorCategoria.length === 1 ? "categoria" : "categorias"}`}
+        />
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {gastosPorCategoria.map((g, idx) => (
+            <motion.div
+              key={g.categoria}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                delay: idx * 0.04,
+                duration: 0.4,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+            >
+              <Card variant="soft" className="p-4 h-full">
                 <div className="flex items-start justify-between mb-2">
                   <p className="text-sm font-medium">{g.label}</p>
                   <span className="text-[10px] font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded">
@@ -138,11 +171,11 @@ export function Overview() {
                   value={g.total > 0 ? (g.pago / g.total) * 100 : 0}
                   className="h-1.5"
                 />
-              </div>
-            ))}
-          </div>
-        </Card>
-      </motion.div>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }
