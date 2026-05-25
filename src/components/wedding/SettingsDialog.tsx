@@ -173,30 +173,21 @@ export function SettingsDialog() {
             </div>
 
             <div className="space-y-2">
-              <label
-                htmlFor="dark-mode-switch"
-                className="flex items-center justify-between p-3 bg-muted/40 rounded-xl border border-border/60 cursor-pointer hover:bg-muted/60 transition-colors"
-              >
+              <div className="flex items-center justify-between p-3 bg-muted/40 rounded-xl border border-border/60 hover:bg-muted/60 transition-colors">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-card rounded-lg shadow-sm text-sage border border-border/40">
-                    <Moon className="w-4 h-4" strokeWidth={1.8} />
+                  <div className="p-1 bg-card rounded-lg shadow-sm text-sage border border-border/40 flex items-center justify-center">
+                    <AnimatedThemeToggler onToggle={() => toggleDarkMode()} />
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm font-medium text-foreground leading-tight">
                       Modo escuro
                     </span>
                     <span className="text-[11px] text-muted-foreground">
-                      Reduz o brilho da interface
+                      Toque no ícone para alternar
                     </span>
                   </div>
                 </div>
-                <Switch
-                  id="dark-mode-switch"
-                  checked={darkMode}
-                  onCheckedChange={toggleDarkMode}
-                  aria-label="Alternar modo escuro"
-                />
-              </label>
+              </div>
 
               {isAdmin && userId && (
                 <AdminUsersDialog
