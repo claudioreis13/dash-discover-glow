@@ -124,7 +124,7 @@ function WeddingDashboard() {
                       }`}
                       strokeWidth={isActive ? 2.2 : 1.75}
                     />
-                    <span className="relative z-10 hidden xs:inline sm:inline">{label}</span>
+                    <span className="relative z-10">{label}</span>
                   </button>
                 );
               })}
