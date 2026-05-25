@@ -52,7 +52,7 @@ function WeddingDashboard() {
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
-  const [tab, setTab] = useState("overview");
+  const [tab, setTab] = useState("inicio");
 
   const data = parseISO(settings.dataCasamento);
   const [diasRestantes, setDiasRestantes] = useState<number | null>(null);
