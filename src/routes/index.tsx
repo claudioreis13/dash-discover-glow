@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Moon, Sun, Settings } from "lucide-react";
+import { Moon, Sun, Settings, LogOut } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Tabs,
   TabsContent,
@@ -117,6 +118,14 @@ function WeddingDashboard() {
               ) : (
                 <Moon className="w-4 h-4" />
               )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => void supabase.auth.signOut()}
+              aria-label="Sair"
+            >
+              <LogOut className="w-4 h-4" />
             </Button>
           </div>
         </div>
