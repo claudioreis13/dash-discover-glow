@@ -45,6 +45,8 @@ import {
   Search,
   ChevronDown,
   ChevronRight,
+  X,
+  ArrowUpDown,
 } from "lucide-react";
 import {
   useWeddingStore,
@@ -80,21 +82,54 @@ export function FornecedorTable() {
   const [filterStatus, setFilterStatus] = useState<StatusType | "todos">(
     "todos",
   );
+  const [sortBy, setSortBy] = useState<
+    "recent" | "nome" | "valor-desc" | "valor-asc" | "vencimento"
+  >("recent");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Fornecedor | null>(null);
   const [dialogTipo, setDialogTipo] = useState<TipoLancamento>("fornecedor");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [toDelete, setToDelete] = useState<Fornecedor | null>(null);
 
+  const hasActiveFilters =
+    search !== "" || filterCat !== "todos" || filterStatus !== "todos";
+
+  const clearFilters = () => {
+    setSearch("");
+    setFilterCat("todos");
+    setFilterStatus("todos");
+  };
+
   const filtered = useMemo(() => {
-    return fornecedores.filter((f) => {
+    const list = fornecedores.filter((f) => {
       if (filterCat !== "todos" && f.categoria !== filterCat) return false;
       if (filterStatus !== "todos" && f.status !== filterStatus) return false;
       if (search && !f.nome.toLowerCase().includes(search.toLowerCase()))
         return false;
       return true;
     });
-  }, [fornecedores, search, filterCat, filterStatus]);
+    const sorted = [...list];
+    switch (sortBy) {
+      case "nome":
+        sorted.sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+        break;
+      case "valor-desc":
+        sorted.sort((a, b) => b.valorTotal - a.valorTotal);
+        break;
+      case "valor-asc":
+        sorted.sort((a, b) => a.valorTotal - b.valorTotal);
+        break;
+      case "vencimento":
+        sorted.sort((a, b) =>
+          (a.vencimento || "9999").localeCompare(b.vencimento || "9999"),
+        );
+        break;
+      default:
+        // keep store order (chronological)
+        break;
+    }
+    return sorted;
+  }, [fornecedores, search, filterCat, filterStatus, sortBy]);
 
   const openNew = (tipo: TipoLancamento = "fornecedor") => {
     setEditing(null);
