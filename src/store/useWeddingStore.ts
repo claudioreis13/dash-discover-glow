@@ -172,6 +172,36 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => {
     }, ms);
   };
 
+  // Generic optimistic mutation helper for fornecedores list.
+  // Pattern: snapshot → apply → log activity → server call → rollback+toast on error.
+  async function runOptimistic<T>(opts: {
+    requireAuth?: boolean;
+    apply: (prev: Fornecedor[]) => { next: Fornecedor[]; payload: T } | null;
+    activity?: (payload: T) => Omit<ActivityEntry, "id" | "timestamp"> | null;
+    server: (payload: T) => Promise<unknown>;
+    errorTitle: string;
+    errorFallback: (payload: T) => string;
+    logTag: string;
+  }): Promise<void> {
+    if (opts.requireAuth && !get().userId) return;
+    const prev = get().fornecedores;
+    const result = opts.apply(prev);
+    if (!result) return;
+    const { next, payload } = result;
+    set({ fornecedores: next });
+    const entry = opts.activity?.(payload);
+    if (entry) get().logActivity(entry);
+    try {
+      await opts.server(payload);
+    } catch (e) {
+      console.error(`[wedding] ${opts.logTag} failed`, e);
+      set({ fornecedores: prev });
+      toast.error(opts.errorTitle, {
+        description: extractErrorMessage(e, opts.errorFallback(payload)),
+      });
+    }
+  }
+
   return {
     fornecedores: [],
     orcamentoTotal: 45000,
@@ -192,192 +222,166 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => {
       }),
 
     logActivity: (entry) => {
-    const userId = get().userId;
-    const next: ActivityEntry = {
-      ...entry,
-      id: crypto.randomUUID(),
-      timestamp: Date.now(),
-    };
-    set((s) => {
-      const list = [next, ...s.activity].slice(0, ACTIVITY_LIMIT);
-      if (userId) persistActivity(userId, list);
-      return { activity: list };
-    });
-  },
-
-  clearActivity: () => {
-    const userId = get().userId;
-    set({ activity: [] });
-    if (userId) persistActivity(userId, []);
-  },
-
-  loadForUser: async (userId) => {
-    set({ userId, hydrated: false, activity: loadActivity(userId) });
-    try {
-      const res = await loadWeddingData();
-      const fornecedores = (res.fornecedores ?? []).map((r) =>
-        rowToFornecedor(r as FornecedorRow),
-      );
-      const s = res.settings;
-      const settings: Settings = {
-        noivos: s?.noivos ?? "Casal",
-        dataCasamento: s?.data_casamento ?? "",
+      const userId = get().userId;
+      const next: ActivityEntry = {
+        ...entry,
+        id: crypto.randomUUID(),
+        timestamp: Date.now(),
       };
-      const orcamentoTotal = Number(s?.orcamento_total) || 45000;
-      const darkMode = !!s?.dark_mode;
-      set({ fornecedores, settings, orcamentoTotal, darkMode, hydrated: true });
-    } catch (e) {
-      console.error("[wedding] loadForUser failed", e);
-      set({ hydrated: true });
-    }
-  },
-
-  addFornecedor: async (f) => {
-    const userId = get().userId;
-    if (!userId) return;
-    const newF: Fornecedor = { ...f, id: crypto.randomUUID(), status: computeStatus(f) };
-    const prev = get().fornecedores;
-    set({ fornecedores: [...prev, newF] });
-    get().logActivity({
-      type: "add",
-      fornecedorNome: newF.nome,
-      description:
-        newF.tipo === "avulso"
-          ? `Compra avulsa adicionada: ${newF.nome}`
-          : `Fornecedor adicionado: ${newF.nome}`,
-    });
-    try {
-      await sfCreateFornecedor({ data: newF });
-    } catch (e) {
-      console.error("[wedding] addFornecedor failed", e);
-      set({ fornecedores: prev });
-      toast.error("Não foi possível salvar", {
-        description: extractErrorMessage(e, `Falha ao adicionar ${newF.nome}.`),
+      set((s) => {
+        const list = [next, ...s.activity].slice(0, ACTIVITY_LIMIT);
+        if (userId) persistActivity(userId, list);
+        return { activity: list };
       });
-      // swallow: rollback + toast already handled
-    }
-  },
+    },
 
-  restoreFornecedor: async (f) => {
-    const userId = get().userId;
-    if (!userId) return;
-    const prev = get().fornecedores;
-    set({ fornecedores: [...prev, f] });
-    get().logActivity({
-      type: "add",
-      fornecedorNome: f.nome,
-      description: `"${f.nome}" restaurado`,
-    });
-    try {
-      await sfCreateFornecedor({ data: f });
-    } catch (e) {
-      console.error("[wedding] restoreFornecedor failed", e);
-      set({ fornecedores: prev });
-      toast.error("Não foi possível restaurar", {
-        description: extractErrorMessage(e, `Falha ao restaurar ${f.nome}.`),
-      });
-      // swallow: rollback + toast already handled
-    }
-  },
+    clearActivity: () => {
+      const userId = get().userId;
+      set({ activity: [] });
+      if (userId) persistActivity(userId, []);
+    },
 
-  updateFornecedor: async (id, updates) => {
-    const userId = get().userId;
-    if (!userId) return;
-    const prev = get().fornecedores;
-    let updated: Fornecedor | null = null;
-    set({
-      fornecedores: prev.map((f) => {
-        if (f.id !== id) return f;
-        const merged = { ...f, ...updates };
-        const next = { ...merged, status: computeStatus(merged) };
-        updated = next;
-        return next;
+    loadForUser: async (userId) => {
+      set({ userId, hydrated: false, activity: loadActivity(userId) });
+      try {
+        const res = await loadWeddingData();
+        const fornecedores = (res.fornecedores ?? []).map((r) =>
+          rowToFornecedor(r as FornecedorRow),
+        );
+        const s = res.settings;
+        const settings: Settings = {
+          noivos: s?.noivos ?? "Casal",
+          dataCasamento: s?.data_casamento ?? "",
+        };
+        const orcamentoTotal = Number(s?.orcamento_total) || 45000;
+        const darkMode = !!s?.dark_mode;
+        set({ fornecedores, settings, orcamentoTotal, darkMode, hydrated: true });
+      } catch (e) {
+        console.error("[wedding] loadForUser failed", e);
+        set({ hydrated: true });
+      }
+    },
+
+    addFornecedor: (f) =>
+      runOptimistic<Fornecedor>({
+        requireAuth: true,
+        apply: (prev) => {
+          const newF: Fornecedor = { ...f, id: crypto.randomUUID(), status: computeStatus(f) };
+          return { next: [...prev, newF], payload: newF };
+        },
+        activity: (newF) => ({
+          type: "add",
+          fornecedorNome: newF.nome,
+          description:
+            newF.tipo === "avulso"
+              ? `Compra avulsa adicionada: ${newF.nome}`
+              : `Fornecedor adicionado: ${newF.nome}`,
+        }),
+        server: (newF) => sfCreateFornecedor({ data: newF }),
+        errorTitle: "Não foi possível salvar",
+        errorFallback: (newF) => `Falha ao adicionar ${newF.nome}.`,
+        logTag: "addFornecedor",
       }),
-    });
-    if (!updated) return;
-    const u: Fornecedor = updated;
-    get().logActivity({
-      type: "update",
-      fornecedorNome: u.nome,
-      description: `${u.nome} atualizado`,
-    });
-    try {
-      await sfUpdateFornecedor({ data: u });
-    } catch (e) {
-      console.error("[wedding] updateFornecedor failed", e);
-      set({ fornecedores: prev });
-      toast.error("Não foi possível atualizar", {
-        description: extractErrorMessage(e, `Falha ao atualizar ${u.nome}.`),
-      });
-      // swallow: rollback + toast already handled
-    }
-  },
 
-  deleteFornecedor: async (id) => {
-    const prev = get().fornecedores;
-    const target = prev.find((f) => f.id === id);
-    set({ fornecedores: prev.filter((f) => f.id !== id) });
-    if (target) {
-      get().logActivity({
-        type: "delete",
-        fornecedorNome: target.nome,
-        description: `${target.nome} removido`,
-      });
-    }
-    try {
-      await sfDeleteFornecedor({ data: { id } });
-    } catch (e) {
-      console.error("[wedding] deleteFornecedor failed", e);
-      set({ fornecedores: prev });
-      toast.error("Não foi possível remover", {
-        description: extractErrorMessage(e, target ? `Falha ao remover ${target.nome}.` : "Tente novamente."),
-      });
-      // swallow: rollback + toast already handled
-    }
-  },
-
-  toggleParcelaPaga: async (fornecedorId, numero) => {
-    const userId = get().userId;
-    if (!userId) return;
-    const prev = get().fornecedores;
-    let updated: Fornecedor | null = null;
-    let wasPago = false;
-    set({
-      fornecedores: prev.map((f) => {
-        if (f.id !== fornecedorId) return f;
-        const parcelas = f.parcelas.map((p) => {
-          if (p.numero !== numero) return p;
-          wasPago = p.pago;
-          return { ...p, pago: !p.pago };
-        });
-        const next = { ...f, parcelas, status: computeStatus({ parcelas }) };
-        updated = next;
-        return next;
+    restoreFornecedor: (f) =>
+      runOptimistic<Fornecedor>({
+        requireAuth: true,
+        apply: (prev) => ({ next: [...prev, f], payload: f }),
+        activity: (f) => ({
+          type: "add",
+          fornecedorNome: f.nome,
+          description: `"${f.nome}" restaurado`,
+        }),
+        server: (f) => sfCreateFornecedor({ data: f }),
+        errorTitle: "Não foi possível restaurar",
+        errorFallback: (f) => `Falha ao restaurar ${f.nome}.`,
+        logTag: "restoreFornecedor",
       }),
-    });
-    if (!updated) return;
-    const u: Fornecedor = updated;
-    const parcela = u.parcelas.find((p) => p.numero === numero);
-    get().logActivity({
-      type: wasPago ? "unpay" : "pay",
-      fornecedorNome: u.nome,
-      description: wasPago
-        ? `Parcela #${numero} de ${u.nome} desmarcada`
-        : `Parcela #${numero} de ${u.nome} paga${parcela ? ` (R$ ${parcela.valor.toLocaleString("pt-BR")})` : ""}`,
-    });
-    try {
-      await updateFornecedorParcelas({
-        data: { id: fornecedorId, parcelas: u.parcelas, status: u.status },
-      });
-    } catch (e) {
-      console.error("[wedding] toggleParcelaPaga failed", e);
-      set({ fornecedores: prev });
-      toast.error("Não foi possível salvar a parcela", {
-        description: extractErrorMessage(e, `Falha ao atualizar parcela #${numero}.`),
-      });
-      // swallow: rollback + toast already handled
-    }
-  },
+
+    updateFornecedor: (id, updates) =>
+      runOptimistic<Fornecedor>({
+        requireAuth: true,
+        apply: (prev) => {
+          let updated: Fornecedor | null = null;
+          const next = prev.map((f) => {
+            if (f.id !== id) return f;
+            const merged = { ...f, ...updates };
+            const result = { ...merged, status: computeStatus(merged) };
+            updated = result;
+            return result;
+          });
+          return updated ? { next, payload: updated } : null;
+        },
+        activity: (u) => ({
+          type: "update",
+          fornecedorNome: u.nome,
+          description: `${u.nome} atualizado`,
+        }),
+        server: (u) => sfUpdateFornecedor({ data: u }),
+        errorTitle: "Não foi possível atualizar",
+        errorFallback: (u) => `Falha ao atualizar ${u.nome}.`,
+        logTag: "updateFornecedor",
+      }),
+
+    deleteFornecedor: (id) =>
+      runOptimistic<{ id: string; nome: string | null }>({
+        apply: (prev) => {
+          const target = prev.find((f) => f.id === id);
+          return {
+            next: prev.filter((f) => f.id !== id),
+            payload: { id, nome: target?.nome ?? null },
+          };
+        },
+        activity: ({ nome }) =>
+          nome
+            ? { type: "delete", fornecedorNome: nome, description: `${nome} removido` }
+            : null,
+        server: ({ id }) => sfDeleteFornecedor({ data: { id } }),
+        errorTitle: "Não foi possível remover",
+        errorFallback: ({ nome }) =>
+          nome ? `Falha ao remover ${nome}.` : "Tente novamente.",
+        logTag: "deleteFornecedor",
+      }),
+
+    toggleParcelaPaga: (fornecedorId, numero) =>
+      runOptimistic<{ updated: Fornecedor; wasPago: boolean }>({
+        requireAuth: true,
+        apply: (prev) => {
+          let updated: Fornecedor | null = null;
+          let wasPago = false;
+          const next = prev.map((f) => {
+            if (f.id !== fornecedorId) return f;
+            const parcelas = f.parcelas.map((p) => {
+              if (p.numero !== numero) return p;
+              wasPago = p.pago;
+              return { ...p, pago: !p.pago };
+            });
+            const result = { ...f, parcelas, status: computeStatus({ parcelas }) };
+            updated = result;
+            return result;
+          });
+          return updated ? { next, payload: { updated, wasPago } } : null;
+        },
+        activity: ({ updated, wasPago }) => {
+          const parcela = updated.parcelas.find((p) => p.numero === numero);
+          return {
+            type: wasPago ? "unpay" : "pay",
+            fornecedorNome: updated.nome,
+            description: wasPago
+              ? `Parcela #${numero} de ${updated.nome} desmarcada`
+              : `Parcela #${numero} de ${updated.nome} paga${parcela ? ` (R$ ${parcela.valor.toLocaleString("pt-BR")})` : ""}`,
+          };
+        },
+        server: ({ updated }) =>
+          updateFornecedorParcelas({
+            data: { id: fornecedorId, parcelas: updated.parcelas, status: updated.status },
+          }),
+        errorTitle: "Não foi possível salvar a parcela",
+        errorFallback: () => `Falha ao atualizar parcela #${numero}.`,
+        logTag: "toggleParcelaPaga",
+      }),
+
+
 
 
   setOrcamentoTotal: (v) => {
