@@ -53,7 +53,10 @@ function WeddingDashboard() {
   const [tab, setTab] = useState("overview");
 
   const data = parseISO(settings.dataCasamento);
-  const diasRestantes = differenceInCalendarDays(data, new Date());
+  const [diasRestantes, setDiasRestantes] = useState<number | null>(null);
+  useEffect(() => {
+    setDiasRestantes(differenceInCalendarDays(data, new Date()));
+  }, [data]);
 
   return (
     <div className="min-h-screen bg-background">
