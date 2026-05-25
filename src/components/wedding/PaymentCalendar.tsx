@@ -60,6 +60,19 @@ export function PaymentCalendar() {
     .filter((i) => i.pago)
     .reduce((a, i) => a + i.valor, 0);
 
+  // Heatmap: maior valor diário do mês corrente — usado para intensidade da célula
+  const maxDia = mesItems.length
+    ? Math.max(
+        ...Array.from(
+          mesItems.reduce<Map<string, number>>((acc, i) => {
+            const k = i.data.toISOString().slice(0, 10);
+            acc.set(k, (acc.get(k) ?? 0) + i.valor);
+            return acc;
+          }, new Map()).values(),
+        ),
+      )
+    : 0;
+
   const start = startOfWeek(startOfMonth(cursor), { weekStartsOn: 0 });
   const end = endOfWeek(endOfMonth(cursor), { weekStartsOn: 0 });
 
