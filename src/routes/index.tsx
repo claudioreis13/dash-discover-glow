@@ -46,6 +46,7 @@ function WeddingDashboard() {
     setSettings,
     orcamentoTotal,
     setOrcamentoTotal,
+    fornecedores,
   } = useWeddingStore();
 
   useEffect(() => {
@@ -53,6 +54,7 @@ function WeddingDashboard() {
   }, [darkMode]);
 
   const [tab, setTab] = useState("inicio");
+  const temFornecedores = fornecedores.length > 0;
 
   const data = parseISO(settings.dataCasamento);
   const [diasRestantes, setDiasRestantes] = useState<number | null>(null);
@@ -149,7 +151,7 @@ function WeddingDashboard() {
           </TabsList>
 
           <TabsContent value="inicio" className="space-y-6">
-            <HeroCard />
+            {temFornecedores && <HeroCard />}
             <EmptyState />
           </TabsContent>
           <TabsContent value="overview" className="space-y-6">
