@@ -178,7 +178,7 @@ export function FornecedorTable() {
                 className="pl-9"
               />
             </div>
-            <div className="flex gap-2 w-full sm:w-auto">
+            <div className="flex gap-2 w-full sm:w-auto flex-wrap">
               <Select
                 value={filterCat}
                 onValueChange={(v) => setFilterCat(v as CategoriaType | "todos")}
@@ -210,7 +210,41 @@ export function FornecedorTable() {
                   <SelectItem value="atrasado">Atrasado</SelectItem>
                 </SelectContent>
               </Select>
+              <Select
+                value={sortBy}
+                onValueChange={(v) => setSortBy(v as typeof sortBy)}
+              >
+                <SelectTrigger className="flex-1 sm:w-[170px]">
+                  <ArrowUpDown className="w-3.5 h-3.5 mr-1.5 text-muted-foreground shrink-0" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Mais recentes</SelectItem>
+                  <SelectItem value="nome">Nome (A–Z)</SelectItem>
+                  <SelectItem value="valor-desc">Maior valor</SelectItem>
+                  <SelectItem value="valor-asc">Menor valor</SelectItem>
+                  <SelectItem value="vencimento">Vencimento próximo</SelectItem>
+                </SelectContent>
+              </Select>
+              {hasActiveFilters && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="h-9 px-3 text-muted-foreground hover:text-destructive"
+                >
+                  <X className="w-3.5 h-3.5 mr-1" />
+                  Limpar
+                </Button>
+              )}
             </div>
+          </div>
+          {hasActiveFilters && (
+            <p className="text-[11px] text-muted-foreground md:hidden -mt-1">
+              Mostrando {filtered.length} de {fornecedores.length}
+            </p>
+          )}
           </div>
           <div className="grid grid-cols-2 md:flex gap-2">
             <Button variant="outline" onClick={() => openNew("avulso")} className="w-full md:w-auto">
