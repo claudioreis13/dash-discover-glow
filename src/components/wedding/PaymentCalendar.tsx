@@ -22,6 +22,7 @@ import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import { useWeddingStore } from "@/store/useWeddingStore";
 import { formatCurrency } from "@/hooks/useFinancialCalculations";
+import { usePagamentoCelebration } from "@/hooks/usePagamentoCelebration";
 import { toast } from "sonner";
 
 interface Item {
