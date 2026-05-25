@@ -7,10 +7,12 @@ export type CategoriaType =
   | "musica"
   | "lua-de-mel"
   | "logistica"
+  | "avulso"
   | "extras";
 
 export type StatusType = "pago" | "parcial" | "pendente" | "atrasado";
 export type PrioridadeType = "alta" | "média" | "baixa";
+export type TipoLancamento = "fornecedor" | "avulso";
 
 export interface Parcela {
   numero: number;
@@ -32,6 +34,7 @@ export interface Fornecedor {
   observacoes: string;
   contato?: string;
   email?: string;
+  tipo?: TipoLancamento;
 }
 
 export const CATEGORIA_LABELS: Record<CategoriaType, string> = {
@@ -43,5 +46,6 @@ export const CATEGORIA_LABELS: Record<CategoriaType, string> = {
   musica: "Música",
   "lua-de-mel": "Lua de Mel",
   logistica: "Logística",
+  avulso: "Avulso / Compra única",
   extras: "Extras",
 };
