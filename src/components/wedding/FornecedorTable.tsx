@@ -45,6 +45,8 @@ import {
   Search,
   ChevronDown,
   ChevronRight,
+  X,
+  ArrowUpDown,
 } from "lucide-react";
 import {
   useWeddingStore,
@@ -80,21 +82,54 @@ export function FornecedorTable() {
   const [filterStatus, setFilterStatus] = useState<StatusType | "todos">(
     "todos",
   );
+  const [sortBy, setSortBy] = useState<
+    "recent" | "nome" | "valor-desc" | "valor-asc" | "vencimento"
+  >("recent");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Fornecedor | null>(null);
   const [dialogTipo, setDialogTipo] = useState<TipoLancamento>("fornecedor");
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [toDelete, setToDelete] = useState<Fornecedor | null>(null);
 
+  const hasActiveFilters =
+    search !== "" || filterCat !== "todos" || filterStatus !== "todos";
+
+  const clearFilters = () => {
+    setSearch("");
+    setFilterCat("todos");
+    setFilterStatus("todos");
+  };
+
   const filtered = useMemo(() => {
-    return fornecedores.filter((f) => {
+    const list = fornecedores.filter((f) => {
       if (filterCat !== "todos" && f.categoria !== filterCat) return false;
       if (filterStatus !== "todos" && f.status !== filterStatus) return false;
       if (search && !f.nome.toLowerCase().includes(search.toLowerCase()))
         return false;
       return true;
     });
-  }, [fornecedores, search, filterCat, filterStatus]);
+    const sorted = [...list];
+    switch (sortBy) {
+      case "nome":
+        sorted.sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+        break;
+      case "valor-desc":
+        sorted.sort((a, b) => b.valorTotal - a.valorTotal);
+        break;
+      case "valor-asc":
+        sorted.sort((a, b) => a.valorTotal - b.valorTotal);
+        break;
+      case "vencimento":
+        sorted.sort((a, b) =>
+          (a.vencimento || "9999").localeCompare(b.vencimento || "9999"),
+        );
+        break;
+      default:
+        // keep store order (chronological)
+        break;
+    }
+    return sorted;
+  }, [fornecedores, search, filterCat, filterStatus, sortBy]);
 
   const openNew = (tipo: TipoLancamento = "fornecedor") => {
     setEditing(null);
@@ -143,7 +178,7 @@ export function FornecedorTable() {
                 className="pl-9"
               />
             </div>
-            <div className="flex gap-2 w-full sm:w-auto">
+            <div className="flex gap-2 w-full sm:w-auto flex-wrap">
               <Select
                 value={filterCat}
                 onValueChange={(v) => setFilterCat(v as CategoriaType | "todos")}
@@ -175,6 +210,34 @@ export function FornecedorTable() {
                   <SelectItem value="atrasado">Atrasado</SelectItem>
                 </SelectContent>
               </Select>
+              <Select
+                value={sortBy}
+                onValueChange={(v) => setSortBy(v as typeof sortBy)}
+              >
+                <SelectTrigger className="flex-1 sm:w-[170px]">
+                  <ArrowUpDown className="w-3.5 h-3.5 mr-1.5 text-muted-foreground shrink-0" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Mais recentes</SelectItem>
+                  <SelectItem value="nome">Nome (A–Z)</SelectItem>
+                  <SelectItem value="valor-desc">Maior valor</SelectItem>
+                  <SelectItem value="valor-asc">Menor valor</SelectItem>
+                  <SelectItem value="vencimento">Vencimento próximo</SelectItem>
+                </SelectContent>
+              </Select>
+              {hasActiveFilters && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearFilters}
+                  className="h-9 px-3 text-muted-foreground hover:text-destructive"
+                >
+                  <X className="w-3.5 h-3.5 mr-1" />
+                  Limpar
+                </Button>
+              )}
             </div>
           </div>
           <div className="grid grid-cols-2 md:flex gap-2">
@@ -187,6 +250,12 @@ export function FornecedorTable() {
             </Button>
           </div>
         </div>
+
+        {hasActiveFilters && (
+          <p className="text-[11px] text-muted-foreground mb-3 -mt-1">
+            Mostrando {filtered.length} de {fornecedores.length} lançamentos
+          </p>
+        )}
 
         {/* Mobile card list */}
         <div className="md:hidden space-y-2">

@@ -28,6 +28,7 @@ import { Overview } from "@/components/wedding/Overview";
 import { FornecedorTable } from "@/components/wedding/FornecedorTable";
 import { Relatorios } from "@/components/wedding/Relatorios";
 import { EmptyState } from "@/components/wedding/EmptyState";
+import { QuickAddButton } from "@/components/wedding/QuickAddButton";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -366,6 +367,8 @@ function WeddingDashboard() {
           </TabsContent>
         </Tabs>
       </main>
+
+      <QuickAddButton />
     </div>
   );
 }

@@ -3,7 +3,7 @@ import {
   CheckCircle2,
   Clock,
   TrendingUp,
-  FileText,
+  FileSignature,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -11,6 +11,7 @@ import { MetricCard } from "./MetricCard";
 import { BudgetDonut } from "./BudgetDonut";
 import { PaymentTimeline } from "./PaymentTimeline";
 import { HeroCard } from "./HeroCard";
+import { ActivityFeed } from "./ActivityFeed";
 
 import { PaymentCalendar } from "./PaymentCalendar";
 import {
@@ -43,31 +44,43 @@ export function Overview() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <MetricCard
+          label="Total contratado"
+          valor={formatCurrency(dashboard.valorComprometido)}
+          icon={<FileSignature className="w-4 h-4" />}
+          tone="default"
+          hint={`${dashboard.contratosTotal} ${dashboard.contratosTotal === 1 ? "lançamento" : "lançamentos"}`}
+          delay={0}
+        />
+        <MetricCard
           label="Já pago"
           valor={formatCurrency(dashboard.valorPago)}
           icon={<CheckCircle2 className="w-4 h-4" />}
           tone="success"
-          delay={0}
+          hint={
+            dashboard.valorComprometido > 0
+              ? `${((dashboard.valorPago / dashboard.valorComprometido) * 100).toFixed(0)}% do contratado`
+              : undefined
+          }
+          delay={0.05}
         />
         <MetricCard
           label="A pagar"
           valor={formatCurrency(dashboard.valorPendente)}
           icon={<Clock className="w-4 h-4" />}
           tone="warning"
-          delay={0.05}
-        />
-        <MetricCard
-          label="% utilizado"
-          valor={`${dashboard.percentualUtilizado.toFixed(1)}%`}
-          icon={<TrendingUp className="w-4 h-4" />}
-          tone={dashboard.percentualUtilizado > 100 ? "destructive" : "default"}
+          hint={`${proximasParcelas.length} ${proximasParcelas.length === 1 ? "parcela pendente" : "parcelas pendentes"}`}
           delay={0.1}
         />
         <MetricCard
-          label="Contratos"
-          valor={String(dashboard.contratosTotal)}
-          icon={<FileText className="w-4 h-4" />}
-          tone="accent"
+          label="% do orçamento usado"
+          valor={`${dashboard.percentualUtilizado.toFixed(1)}%`}
+          icon={<TrendingUp className="w-4 h-4" />}
+          tone={dashboard.percentualUtilizado > 100 ? "destructive" : "accent"}
+          hint={
+            dashboard.percentualUtilizado > 100
+              ? `Estourou em ${formatCurrency(Math.abs(dashboard.saldoRestante))}`
+              : `Restam ${formatCurrency(dashboard.saldoRestante)}`
+          }
           delay={0.15}
         />
       </div>
@@ -86,7 +99,13 @@ export function Overview() {
         <PaymentTimeline items={proximasParcelas} />
       </div>
 
-      <PaymentCalendar />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <PaymentCalendar />
+        </div>
+        <ActivityFeed />
+      </div>
+
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}
