@@ -112,8 +112,11 @@ export function EmptyState() {
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-md mx-auto leading-relaxed">
             O grande dia está a{" "}
-            <span className="text-[var(--warning)] font-semibold tabular-nums">
-              {dias} dias
+            <span
+              className="text-[var(--warning)] font-semibold tabular-nums"
+              suppressHydrationWarning
+            >
+              {mounted ? `${dias} dias` : "…"}
             </span>{" "}
             de distância. Vamos tornar o planejamento tão especial quanto a
             festa?
