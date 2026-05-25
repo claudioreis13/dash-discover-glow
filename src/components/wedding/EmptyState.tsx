@@ -74,11 +74,13 @@ export function EmptyState() {
 
   const { settings } = useWeddingStore();
   const dataCasamento = parseISO(settings.dataCasamento);
+  const dataValida = !isNaN(dataCasamento.getTime());
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
-  const dias = mounted
-    ? Math.max(0, differenceInCalendarDays(dataCasamento, new Date()))
-    : 0;
+  const dias =
+    mounted && dataValida
+      ? Math.max(0, differenceInCalendarDays(dataCasamento, new Date()))
+      : 0;
 
   const start = (categoria?: CategoriaType) => {
     setCat(categoria);
@@ -111,15 +113,25 @@ export function EmptyState() {
             Bem-vindos, {settings.noivos}
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-md mx-auto leading-relaxed">
-            O grande dia está a{" "}
-            <span
-              className="text-[var(--warning)] font-semibold tabular-nums"
-              suppressHydrationWarning
-            >
-              {mounted ? `${dias} dias` : "…"}
-            </span>{" "}
-            de distância. Vamos tornar o planejamento tão especial quanto a
-            festa?
+            {mounted && dataValida ? (
+              <>
+                O grande dia está a{" "}
+                <span className="text-[var(--warning)] font-semibold tabular-nums">
+                  {dias} {dias === 1 ? "dia" : "dias"}
+                </span>{" "}
+                de distância. Vamos tornar o planejamento tão especial quanto a
+                festa?
+              </>
+            ) : (
+              <>
+                Defina a{" "}
+                <span className="text-[var(--warning)] font-semibold">
+                  data do casamento
+                </span>{" "}
+                em <span aria-hidden>⚙️</span> configurações para começar a
+                contagem regressiva.
+              </>
+            )}
           </p>
         </div>
 
@@ -128,7 +140,7 @@ export function EmptyState() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.4 }}
-          className="relative overflow-hidden bg-card border border-sage/40 rounded-3xl p-8 md:p-10 text-center shadow-[0_10px_40px_-15px_color-mix(in_oklab,var(--sage)_40%,transparent)]"
+          className="relative overflow-hidden bg-card border border-sage/40 rounded-3xl p-6 md:p-10 text-center shadow-[0_10px_40px_-15px_color-mix(in_oklab,var(--sage)_40%,transparent)]"
         >
           <div
             aria-hidden
@@ -136,8 +148,8 @@ export function EmptyState() {
           />
           <div className="relative z-10 max-w-sm mx-auto space-y-6">
             <div className="space-y-2">
-              <h2 className="font-serif text-2xl md:text-3xl font-semibold">
-                Sua jornada financeira começa agora
+              <h2 className="font-serif text-xl sm:text-2xl md:text-3xl font-semibold whitespace-nowrap">
+                Sua jornada começa agora
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 Adicione seu primeiro contrato para desbloquear o controle de
@@ -154,6 +166,7 @@ export function EmptyState() {
             </Button>
           </div>
         </motion.div>
+
 
         {/* Curated Suggestions */}
         <div className="space-y-6">

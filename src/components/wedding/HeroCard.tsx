@@ -11,14 +11,14 @@ export function HeroCard() {
   const { dashboard } = useFinancialCalculations();
 
   const dataCasamento = parseISO(settings.dataCasamento);
+  const dataValida = !isNaN(dataCasamento.getTime());
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  const hoje = mounted ? new Date() : dataCasamento;
-  const diasRestantes = mounted
-    ? differenceInCalendarDays(dataCasamento, hoje)
-    : 0;
+  const hoje = mounted ? new Date() : (dataValida ? dataCasamento : new Date());
+  const diasRestantes =
+    mounted && dataValida ? differenceInCalendarDays(dataCasamento, hoje) : 0;
 
   // Tempo: começa na contratação mais antiga (ou hoje se nenhum)
   const inicio = fornecedores.length
@@ -26,15 +26,16 @@ export function HeroCard() {
         .map((f) => parseISO(f.dataCont).getTime())
         .reduce((a, b) => Math.min(a, b), hoje.getTime())
     : hoje.getTime();
-  const totalDias = Math.max(
-    1,
-    differenceInCalendarDays(dataCasamento, new Date(inicio)),
-  );
+  const totalDias = dataValida
+    ? Math.max(1, differenceInCalendarDays(dataCasamento, new Date(inicio)))
+    : 1;
   const passadosDias = Math.max(
     0,
     differenceInCalendarDays(hoje, new Date(inicio)),
   );
-  const pctTempo = mounted ? Math.min(100, (passadosDias / totalDias) * 100) : 0;
+  const pctTempo =
+    mounted && dataValida ? Math.min(100, (passadosDias / totalDias) * 100) : 0;
+
 
   const pctFin =
     dashboard.valorComprometido > 0
@@ -80,7 +81,11 @@ export function HeroCard() {
               <ProgressLine
                 label="Tempo até o casamento"
                 pct={pctTempo}
-                hint={`${diasRestantes >= 0 ? diasRestantes : 0} dias restantes`}
+                hint={
+                  dataValida
+                    ? `${diasRestantes >= 0 ? diasRestantes : 0} dias restantes`
+                    : "defina a data nas configurações"
+                }
                 tone="time"
               />
               <ProgressLine
