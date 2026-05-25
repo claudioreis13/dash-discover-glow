@@ -32,11 +32,11 @@ export function MetricCard({
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.4, ease: "easeOut" }}
+      transition={{ delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
     >
-      <Card className="p-5 h-full flex flex-col gap-3 border-border/60 hover:shadow-md transition-shadow">
+      <Card variant="stat" className="p-5 h-full flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
             {label}
           </p>
           <div
@@ -49,11 +49,11 @@ export function MetricCard({
           </div>
         </div>
         <div>
-          <p className="text-2xl font-semibold tabular-nums text-foreground">
+          <p className="text-3xl font-semibold tabular-nums text-foreground tracking-tight">
             {valor}
           </p>
           {hint && (
-            <p className="text-xs text-muted-foreground mt-1">{hint}</p>
+            <p className="text-xs text-muted-foreground mt-1.5">{hint}</p>
           )}
         </div>
       </Card>
