@@ -182,16 +182,43 @@
   * {
     border-color: var(--color-border);
   }
+  html {
+    font-family: var(--font-sans);
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
-    font-feature-settings: "ss01", "cv11";
+    font-family: var(--font-sans);
+    font-feature-settings: "ss01", "cv11", "cv02";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* Subtle paper grain — barely perceptible */
+    background-image:
+      radial-gradient(at 0% 0%, color-mix(in oklab, var(--sage) 6%, transparent) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, color-mix(in oklab, var(--blush) 5%, transparent) 0px, transparent 50%);
+    background-attachment: fixed;
   }
 }
 
 @layer utilities {
   .font-serif {
-    font-family: "Cormorant Garamond", ui-serif, Georgia, serif;
+    font-family: var(--font-serif);
     font-feature-settings: "liga", "dlig";
+    letter-spacing: -0.01em;
   }
+  .font-display {
+    font-family: var(--font-serif);
+    font-feature-settings: "liga", "dlig", "swsh";
+    letter-spacing: -0.02em;
+    line-height: 1.02;
+  }
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+  .shadow-soft { box-shadow: var(--shadow-soft); }
+  .shadow-elevated { box-shadow: var(--shadow-elevated); }
+  .shadow-hero { box-shadow: var(--shadow-hero); }
+  .shadow-blush { box-shadow: var(--shadow-blush); }
 }
