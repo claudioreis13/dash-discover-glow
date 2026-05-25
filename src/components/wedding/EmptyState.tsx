@@ -72,7 +72,8 @@ export function EmptyState() {
   const [cat, setCat] = useState<CategoriaType | undefined>(undefined);
   const [showAll, setShowAll] = useState(false);
 
-  const { settings } = useWeddingStore();
+  const { settings, fornecedores } = useWeddingStore();
+  const hasFornecedores = fornecedores.length > 0;
   const dataCasamento = parseISO(settings.dataCasamento);
   const dataValida = !isNaN(dataCasamento.getTime());
   const [mounted, setMounted] = useState(false);
