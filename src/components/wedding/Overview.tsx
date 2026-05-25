@@ -156,37 +156,52 @@ export function Overview() {
           hint={`${gastosPorCategoria.length} ${gastosPorCategoria.length === 1 ? "categoria" : "categorias"}`}
         />
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {gastosPorCategoria.map((g, idx) => (
-            <motion.div
-              key={g.categoria}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: idx * 0.04,
-                duration: 0.4,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-            >
-              <Card variant="soft" className="p-4 h-full">
-                <div className="flex items-start justify-between mb-2">
-                  <p className="text-sm font-medium">{g.label}</p>
-                  <span className="text-[10px] font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded">
-                    {g.percentual.toFixed(1)}%
-                  </span>
-                </div>
-                <p className="text-lg font-semibold tabular-nums">
-                  {formatCurrency(g.total)}
-                </p>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Pago: {formatCurrency(g.pago)}
-                </p>
-                <Progress
-                  value={g.total > 0 ? (g.pago / g.total) * 100 : 0}
-                  className="h-1.5"
-                />
-              </Card>
-            </motion.div>
-          ))}
+          {gastosPorCategoria.map((g, idx) => {
+            const parcelas = parcelasPorCategoria.get(g.categoria) ?? [];
+            const pagas = parcelas.filter(Boolean).length;
+            return (
+              <motion.div
+                key={g.categoria}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  delay: idx * 0.04,
+                  duration: 0.4,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+              >
+                <Card
+                  variant="soft"
+                  className="p-4 h-full transition-all duration-300 hover:-translate-y-0.5 hover:shadow-elevated hover:border-sage/40"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <p className="text-sm font-medium">{g.label}</p>
+                    <span className="text-[10px] font-semibold bg-primary/10 text-primary px-2 py-0.5 rounded">
+                      {g.percentual.toFixed(1)}%
+                    </span>
+                  </div>
+                  <p className="text-lg font-semibold tabular-nums">
+                    {formatCurrency(g.total)}
+                  </p>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Pago: {formatCurrency(g.pago)}
+                  </p>
+                  <Progress
+                    value={g.total > 0 ? (g.pago / g.total) * 100 : 0}
+                    className="h-1.5"
+                  />
+                  {parcelas.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-border/40 flex items-center justify-between gap-2">
+                      <ParcelStrip parcelas={parcelas} />
+                      <span className="text-[10px] tabular-nums text-muted-foreground shrink-0">
+                        {pagas}/{parcelas.length}
+                      </span>
+                    </div>
+                  )}
+                </Card>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
     </div>
