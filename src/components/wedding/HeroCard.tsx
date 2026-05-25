@@ -3,8 +3,22 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { useWeddingStore } from "@/store/useWeddingStore";
 import { useFinancialCalculations, formatCurrency } from "@/hooks/useFinancialCalculations";
-import { differenceInCalendarDays, parseISO } from "date-fns";
+import { differenceInCalendarDays, parseISO, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { Heart } from "lucide-react";
+
+function getMonogram(noivos: string): string {
+  if (!noivos) return "♥";
+  const parts = noivos
+    .split(/\s*(?:&|e|\+|y)\s*/i)
+    .map((p) => p.trim())
+    .filter(Boolean);
+  if (parts.length >= 2) {
+    return `${parts[0][0] ?? ""}${parts[1][0] ?? ""}`.toUpperCase();
+  }
+  const words = noivos.trim().split(/\s+/);
+  return (words[0]?.[0] ?? "♥").toUpperCase();
+}
 
 export function HeroCard() {
   const { settings, fornecedores } = useWeddingStore();
