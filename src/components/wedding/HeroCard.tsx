@@ -81,7 +81,11 @@ export function HeroCard() {
               <ProgressLine
                 label="Tempo até o casamento"
                 pct={pctTempo}
-                hint={`${diasRestantes >= 0 ? diasRestantes : 0} dias restantes`}
+                hint={
+                  dataValida
+                    ? `${diasRestantes >= 0 ? diasRestantes : 0} dias restantes`
+                    : "defina a data nas configurações"
+                }
                 tone="time"
               />
               <ProgressLine
