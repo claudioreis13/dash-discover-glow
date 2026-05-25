@@ -381,19 +381,8 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => {
 
 
   setOrcamentoTotal: (v) => {
-    const userId = get().userId;
     set({ orcamentoTotal: v });
-    if (userId) {
-      const state = get();
-      void saveUserSettings({
-        data: {
-          noivos: state.settings.noivos || "Casal",
-          dataCasamento: state.settings.dataCasamento,
-          orcamentoTotal: v,
-          darkMode: state.darkMode,
-        },
-      }).catch((e) => console.error("[wedding] setOrcamentoTotal failed", e));
-    }
+    debouncedSaveSettings();
   },
 
   setSettings: (s) => {
