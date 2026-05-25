@@ -72,7 +72,7 @@ function WeddingDashboard() {
               </h1>
               <p className="text-xs text-muted-foreground">
                 {format(data, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                {diasRestantes >= 0 && (
+                {diasRestantes !== null && diasRestantes >= 0 && (
                   <span className="ml-2 text-primary font-medium">
                     • faltam {diasRestantes} dias
                   </span>
