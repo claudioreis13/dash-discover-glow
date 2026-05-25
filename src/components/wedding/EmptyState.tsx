@@ -149,11 +149,12 @@ export function EmptyState() {
           <div className="relative z-10 max-w-sm mx-auto space-y-6">
             <div className="space-y-2">
               <h2 className="font-serif text-xl sm:text-2xl md:text-3xl font-semibold whitespace-nowrap">
-                Sua jornada começa agora
+                {hasFornecedores ? "Continue construindo" : "Sua jornada começa agora"}
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Adicione seu primeiro contrato para desbloquear o controle de
-                parcelas e visibilidade total do seu orçamento.
+                {hasFornecedores
+                  ? "Adicione mais um fornecedor para manter o controle de parcelas e a visibilidade total do seu orçamento."
+                  : "Adicione seu primeiro contrato para desbloquear o controle de parcelas e visibilidade total do seu orçamento."}
               </p>
             </div>
             <Button
@@ -162,7 +163,7 @@ export function EmptyState() {
               className="bg-sage text-sage-foreground hover:bg-sage/90 rounded-full px-7 shadow-md"
             >
               <Plus className="w-4 h-4 mr-1.5" />
-              Cadastrar primeiro fornecedor
+              {hasFornecedores ? "Cadastrar novo fornecedor" : "Cadastrar primeiro fornecedor"}
             </Button>
           </div>
         </motion.div>
