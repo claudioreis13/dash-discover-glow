@@ -19,7 +19,7 @@ import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { AdminUsersDialog } from "@/components/admin/AdminUsersDialog";
 
 export function SettingsDialog() {
-  const { darkMode, toggleDarkMode, settings, orcamentoTotal, saveSettings, userId } =
+  const { toggleDarkMode, settings, orcamentoTotal, saveSettings, userId } =
     useWeddingStore();
   const { isAdmin } = useIsAdmin(userId);
 
