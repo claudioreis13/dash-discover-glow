@@ -204,9 +204,10 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
       }),
     }));
     if (updated) {
+      const u: Fornecedor = updated;
       await supabase
         .from("fornecedores")
-        .update({ parcelas: updated.parcelas, status: updated.status })
+        .update({ parcelas: u.parcelas as unknown as object, status: u.status } as never)
         .eq("id", fornecedorId);
     }
   },
