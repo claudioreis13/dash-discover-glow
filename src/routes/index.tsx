@@ -20,7 +20,6 @@ import { Overview } from "@/components/wedding/Overview";
 import { FornecedorTable } from "@/components/wedding/FornecedorTable";
 import { Relatorios } from "@/components/wedding/Relatorios";
 import { EmptyState } from "@/components/wedding/EmptyState";
-import { HeroCard } from "@/components/wedding/HeroCard";
 
 export const Route = createFileRoute("/")({
   head: () => ({
