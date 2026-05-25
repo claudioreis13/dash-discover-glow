@@ -46,7 +46,9 @@ function WeddingDashboard() {
     setSettings,
     orcamentoTotal,
     setOrcamentoTotal,
+    userId,
   } = useWeddingStore();
+  const { isAdmin } = useIsAdmin(userId);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
