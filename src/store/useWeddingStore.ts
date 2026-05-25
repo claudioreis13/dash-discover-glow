@@ -25,6 +25,7 @@ interface WeddingStore {
   toggleParcelaPaga: (fornecedorId: string, numero: number) => Promise<void>;
   setOrcamentoTotal: (v: number) => void;
   setSettings: (s: Partial<Settings>) => void;
+  saveSettings: (settings: Settings, orcamentoTotal: number) => Promise<boolean>;
   toggleDarkMode: () => void;
 }
 
@@ -249,6 +250,26 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
         { onConflict: "user_id" },
       );
     }
+  },
+
+  saveSettings: async (nextSettings, nextOrcamentoTotal) => {
+    const userId = get().userId;
+    if (!userId) return false;
+
+    const normalizedSettings = {
+      noivos: nextSettings.noivos || "Casal",
+      dataCasamento: nextSettings.dataCasamento,
+    };
+
+    const { error } = await supabase.from("user_settings").upsert(
+      settingsToRow(userId, normalizedSettings, nextOrcamentoTotal, get().darkMode),
+      { onConflict: "user_id" },
+    );
+
+    if (error) return false;
+
+    set({ settings: normalizedSettings, orcamentoTotal: nextOrcamentoTotal });
+    return true;
   },
 
   toggleDarkMode: () => {
