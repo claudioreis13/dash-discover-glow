@@ -195,7 +195,8 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
     const userId = get().userId;
     if (!userId) return;
     const newF: Fornecedor = { ...f, id: crypto.randomUUID(), status: computeStatus(f) };
-    set((s) => ({ fornecedores: [...s.fornecedores, newF] }));
+    const prev = get().fornecedores;
+    set({ fornecedores: [...prev, newF] });
     get().logActivity({
       type: "add",
       fornecedorNome: newF.nome,
@@ -208,13 +209,19 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
       await sfCreateFornecedor({ data: newF });
     } catch (e) {
       console.error("[wedding] addFornecedor failed", e);
+      set({ fornecedores: prev });
+      toast.error("Não foi possível salvar", {
+        description: extractErrorMessage(e, `Falha ao adicionar ${newF.nome}.`),
+      });
+      throw e;
     }
   },
 
   restoreFornecedor: async (f) => {
     const userId = get().userId;
     if (!userId) return;
-    set((s) => ({ fornecedores: [...s.fornecedores, f] }));
+    const prev = get().fornecedores;
+    set({ fornecedores: [...prev, f] });
     get().logActivity({
       type: "add",
       fornecedorNome: f.nome,
@@ -224,40 +231,51 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
       await sfCreateFornecedor({ data: f });
     } catch (e) {
       console.error("[wedding] restoreFornecedor failed", e);
+      set({ fornecedores: prev });
+      toast.error("Não foi possível restaurar", {
+        description: extractErrorMessage(e, `Falha ao restaurar ${f.nome}.`),
+      });
+      throw e;
     }
   },
 
   updateFornecedor: async (id, updates) => {
     const userId = get().userId;
     if (!userId) return;
+    const prev = get().fornecedores;
     let updated: Fornecedor | null = null;
-    set((s) => ({
-      fornecedores: s.fornecedores.map((f) => {
+    set({
+      fornecedores: prev.map((f) => {
         if (f.id !== id) return f;
         const merged = { ...f, ...updates };
         const next = { ...merged, status: computeStatus(merged) };
         updated = next;
         return next;
       }),
-    }));
-    if (updated) {
-      const u: Fornecedor = updated;
-      get().logActivity({
-        type: "update",
-        fornecedorNome: u.nome,
-        description: `${u.nome} atualizado`,
+    });
+    if (!updated) return;
+    const u: Fornecedor = updated;
+    get().logActivity({
+      type: "update",
+      fornecedorNome: u.nome,
+      description: `${u.nome} atualizado`,
+    });
+    try {
+      await sfUpdateFornecedor({ data: u });
+    } catch (e) {
+      console.error("[wedding] updateFornecedor failed", e);
+      set({ fornecedores: prev });
+      toast.error("Não foi possível atualizar", {
+        description: extractErrorMessage(e, `Falha ao atualizar ${u.nome}.`),
       });
-      try {
-        await sfUpdateFornecedor({ data: u });
-      } catch (e) {
-        console.error("[wedding] updateFornecedor failed", e);
-      }
+      throw e;
     }
   },
 
   deleteFornecedor: async (id) => {
-    const target = get().fornecedores.find((f) => f.id === id);
-    set((s) => ({ fornecedores: s.fornecedores.filter((f) => f.id !== id) }));
+    const prev = get().fornecedores;
+    const target = prev.find((f) => f.id === id);
+    set({ fornecedores: prev.filter((f) => f.id !== id) });
     if (target) {
       get().logActivity({
         type: "delete",
@@ -269,16 +287,22 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
       await sfDeleteFornecedor({ data: { id } });
     } catch (e) {
       console.error("[wedding] deleteFornecedor failed", e);
+      set({ fornecedores: prev });
+      toast.error("Não foi possível remover", {
+        description: extractErrorMessage(e, target ? `Falha ao remover ${target.nome}.` : "Tente novamente."),
+      });
+      throw e;
     }
   },
 
   toggleParcelaPaga: async (fornecedorId, numero) => {
     const userId = get().userId;
     if (!userId) return;
+    const prev = get().fornecedores;
     let updated: Fornecedor | null = null;
     let wasPago = false;
-    set((s) => ({
-      fornecedores: s.fornecedores.map((f) => {
+    set({
+      fornecedores: prev.map((f) => {
         if (f.id !== fornecedorId) return f;
         const parcelas = f.parcelas.map((p) => {
           if (p.numero !== numero) return p;
@@ -289,26 +313,31 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
         updated = next;
         return next;
       }),
-    }));
-    if (updated) {
-      const u: Fornecedor = updated;
-      const parcela = u.parcelas.find((p) => p.numero === numero);
-      get().logActivity({
-        type: wasPago ? "unpay" : "pay",
-        fornecedorNome: u.nome,
-        description: wasPago
-          ? `Parcela #${numero} de ${u.nome} desmarcada`
-          : `Parcela #${numero} de ${u.nome} paga${parcela ? ` (R$ ${parcela.valor.toLocaleString("pt-BR")})` : ""}`,
+    });
+    if (!updated) return;
+    const u: Fornecedor = updated;
+    const parcela = u.parcelas.find((p) => p.numero === numero);
+    get().logActivity({
+      type: wasPago ? "unpay" : "pay",
+      fornecedorNome: u.nome,
+      description: wasPago
+        ? `Parcela #${numero} de ${u.nome} desmarcada`
+        : `Parcela #${numero} de ${u.nome} paga${parcela ? ` (R$ ${parcela.valor.toLocaleString("pt-BR")})` : ""}`,
+    });
+    try {
+      await updateFornecedorParcelas({
+        data: { id: fornecedorId, parcelas: u.parcelas, status: u.status },
       });
-      try {
-        await updateFornecedorParcelas({
-          data: { id: fornecedorId, parcelas: u.parcelas, status: u.status },
-        });
-      } catch (e) {
-        console.error("[wedding] toggleParcelaPaga failed", e);
-      }
+    } catch (e) {
+      console.error("[wedding] toggleParcelaPaga failed", e);
+      set({ fornecedores: prev });
+      toast.error("Não foi possível salvar a parcela", {
+        description: extractErrorMessage(e, `Falha ao atualizar parcela #${numero}.`),
+      });
+      throw e;
     }
   },
+
 
   setOrcamentoTotal: (v) => {
     const userId = get().userId;
