@@ -19,6 +19,7 @@ interface Parcela {
 
 export function PaymentTimeline({ items }: { items: Parcela[] }) {
   const markPaid = usePagamentoCelebration();
+  return (
     <Card className="p-6 h-full flex flex-col">
       <div className="flex items-center gap-2 mb-4">
         <Calendar className="w-4 h-4 text-primary" />
