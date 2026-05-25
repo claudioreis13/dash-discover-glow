@@ -299,14 +299,9 @@ export function FornecedorTable() {
                                   <Checkbox
                                     id={`p-${f.id}-${p.numero}`}
                                     checked={p.pago}
-                                    onCheckedChange={() => {
-                                      toggleParcelaPaga(f.id, p.numero);
-                                      toast.success(
-                                        p.pago
-                                          ? `Parcela ${p.numero} desmarcada`
-                                          : `Parcela ${p.numero} paga ✓`,
-                                      );
-                                    }}
+                                    onCheckedChange={() =>
+                                      markPaid(f.id, p.numero)
+                                    }
                                   />
                                   <label
                                     htmlFor={`p-${f.id}-${p.numero}`}
