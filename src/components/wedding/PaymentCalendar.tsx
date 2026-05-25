@@ -136,10 +136,24 @@ export function PaymentCalendar() {
           const cell = (
             <button
               type="button"
-              className={`relative w-full aspect-square min-h-[58px] p-1.5 rounded-lg border text-left transition
-                ${noMes ? "bg-card" : "bg-muted/30 text-muted-foreground"}
+              style={
+                noMes && totalDia > 0 && maxDia > 0
+                  ? {
+                      backgroundColor: `color-mix(in oklab, var(--sage) ${
+                        6 + (totalDia / maxDia) * 28
+                      }%, var(--card))`,
+                    }
+                  : undefined
+              }
+              className={`group relative w-full aspect-square min-h-[58px] p-1.5 rounded-lg border text-left transition-all duration-200
+                ${noMes ? "" : "bg-muted/30 text-muted-foreground"}
+                ${noMes && totalDia === 0 ? "bg-card" : ""}
                 ${isToday ? "border-primary ring-1 ring-primary/30" : "border-border/50"}
-                ${dayItems.length ? "hover:border-primary/50 cursor-pointer" : "cursor-default"}
+                ${
+                  dayItems.length
+                    ? "hover:border-sage/60 hover:shadow-soft hover:-translate-y-0.5 cursor-pointer"
+                    : "cursor-default"
+                }
               `}
               disabled={dayItems.length === 0}
             >
@@ -153,7 +167,7 @@ export function PaymentCalendar() {
                 </span>
                 {dayItems.length > 0 && (
                   <span
-                    className={`text-[9px] font-semibold px-1 rounded ${
+                    className={`text-[9px] font-semibold px-1 rounded transition-transform group-hover:scale-110 ${
                       algumAtrasado
                         ? "bg-destructive/20 text-destructive"
                         : todosPagos
