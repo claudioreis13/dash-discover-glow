@@ -13,14 +13,12 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { useWeddingStore } from "@/store/useWeddingStore";
 import { useIsAdmin } from "@/hooks/useIsAdmin";
 import { AdminUsersDialog } from "@/components/admin/AdminUsersDialog";
 
 export function SettingsDialog() {
-  const { toggleDarkMode, settings, orcamentoTotal, saveSettings, userId } =
-    useWeddingStore();
+  const { settings, orcamentoTotal, saveSettings, userId } = useWeddingStore();
   const { isAdmin } = useIsAdmin(userId);
 
   const [settingsDraft, setSettingsDraft] = useState(settings);
