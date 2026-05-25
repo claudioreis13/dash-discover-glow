@@ -38,11 +38,22 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-sm text-muted-foreground">Carregando…</div>
+      <div className="min-h-dvh flex items-center justify-center bg-background px-6">
+        <div className="flex flex-col items-center gap-4">
+          <div
+            aria-hidden
+            className="h-14 w-14 rounded-full bg-gradient-to-br from-olive to-sage shadow-hero flex items-center justify-center text-cream text-xl font-display animate-[brand-pulse_1.6s_ease-in-out_infinite]"
+          >
+            ♥
+          </div>
+          <p className="text-[10px] uppercase tracking-[0.22em] text-sage font-semibold">
+            Carregando seu casamento
+          </p>
+        </div>
       </div>
     );
   }
+
 
   if (status === "anon") {
     return <LoginPage />;
