@@ -128,8 +128,7 @@ export function EmptyState() {
                 <span className="text-[var(--warning)] font-semibold">
                   data do casamento
                 </span>{" "}
-                em <span aria-hidden>⚙️</span> configurações para começar a
-                contagem regressiva.
+                nas configurações para começar a contagem regressiva.
               </>
             )}
           </p>
