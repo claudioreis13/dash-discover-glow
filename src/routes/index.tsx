@@ -142,11 +142,16 @@ function WeddingDashboard() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <Tabs value={tab} onValueChange={setTab} className="space-y-6">
           <TabsList>
+            <TabsTrigger value="inicio">Início</TabsTrigger>
             <TabsTrigger value="overview">Visão geral</TabsTrigger>
             <TabsTrigger value="fornecedores">Fornecedores</TabsTrigger>
             <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
           </TabsList>
 
+          <TabsContent value="inicio" className="space-y-6">
+            <HeroCard />
+            <EmptyState />
+          </TabsContent>
           <TabsContent value="overview" className="space-y-6">
             <Overview />
           </TabsContent>
