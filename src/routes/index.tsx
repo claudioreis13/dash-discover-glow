@@ -43,7 +43,6 @@ function WeddingDashboard() {
     setSettings,
     orcamentoTotal,
     setOrcamentoTotal,
-    fornecedores,
   } = useWeddingStore();
 
   useEffect(() => {
