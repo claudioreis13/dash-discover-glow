@@ -78,57 +78,59 @@ function WeddingDashboard() {
     <div className="min-h-screen bg-background pb-[env(safe-area-inset-bottom)]">
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-3 flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 sm:gap-0 relative">
-          <Tabs value={tab} onValueChange={setTab} className="w-full sm:w-auto order-2 sm:order-1">
+          <Tabs value={tab} onValueChange={setTab} className="w-full sm:w-auto order-2 sm:order-1 min-w-0">
             <TabsList className="sr-only">
               <TabsTrigger value="inicio">Início</TabsTrigger>
               <TabsTrigger value="overview">Visão Geral</TabsTrigger>
               <TabsTrigger value="fornecedores">Fornecedores</TabsTrigger>
               <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
             </TabsList>
-            <nav
-              role="tablist"
-              aria-label="Navegação principal"
-              className="relative flex w-full sm:w-auto items-center gap-0.5 rounded-full border border-sage/30 bg-card/70 p-1 shadow-[0_4px_20px_-8px_color-mix(in_oklab,var(--sage)_40%,transparent)] backdrop-blur"
-            >
-              {[
-                { value: "inicio", label: "Início", Icon: Home },
-                { value: "overview", label: "Visão Geral", Icon: LayoutDashboard },
-                { value: "fornecedores", label: "Fornecedores", Icon: Users },
-                { value: "relatorios", label: "Relatórios", Icon: FileBarChart },
-              ].map(({ value, label, Icon }) => {
-                const isActive = tab === value;
-                return (
-                  <button
-                    key={value}
-                    type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    onClick={() => setTab(value)}
-                    className={`group relative flex flex-1 sm:flex-initial items-center justify-center gap-1.5 rounded-full px-3 sm:px-4 py-1.5 text-[11px] sm:text-sm font-medium transition-colors cursor-pointer whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage/50 ${
-                      isActive
-                        ? "text-sage-foreground"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {isActive && (
-                      <motion.span
-                        layoutId="menu-pill"
-                        aria-hidden
-                        className="absolute inset-0 rounded-full bg-gradient-to-br from-sage to-sage/85 shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--sage)_70%,transparent)]"
-                        transition={{ type: "spring", stiffness: 380, damping: 32 }}
-                      />
-                    )}
-                    <Icon
-                      className={`relative z-10 w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-200 ${
-                        isActive ? "" : "group-hover:scale-110"
+            <div className="relative -mx-3 sm:mx-0 px-3 sm:px-0 overflow-x-auto [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <nav
+                role="tablist"
+                aria-label="Navegação principal"
+                className="relative inline-flex w-max sm:w-auto items-center gap-0.5 rounded-full border border-sage/30 bg-card/70 p-1 shadow-[0_4px_20px_-8px_color-mix(in_oklab,var(--sage)_40%,transparent)] backdrop-blur"
+              >
+                {[
+                  { value: "inicio", label: "Início", Icon: Home },
+                  { value: "overview", label: "Visão Geral", Icon: LayoutDashboard },
+                  { value: "fornecedores", label: "Fornecedores", Icon: Users },
+                  { value: "relatorios", label: "Relatórios", Icon: FileBarChart },
+                ].map(({ value, label, Icon }) => {
+                  const isActive = tab === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      onClick={() => setTab(value)}
+                      className={`group relative flex items-center justify-center gap-1.5 rounded-full px-3.5 sm:px-4 py-2 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors cursor-pointer whitespace-nowrap min-h-[40px] sm:min-h-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage/50 ${
+                        isActive
+                          ? "text-sage-foreground"
+                          : "text-muted-foreground hover:text-foreground"
                       }`}
-                      strokeWidth={isActive ? 2.2 : 1.75}
-                    />
-                    <span className="relative z-10">{label}</span>
-                  </button>
-                );
-              })}
-            </nav>
+                    >
+                      {isActive && (
+                        <motion.span
+                          layoutId="menu-pill"
+                          aria-hidden
+                          className="absolute inset-0 rounded-full bg-gradient-to-br from-sage to-sage/85 shadow-[0_6px_18px_-6px_color-mix(in_oklab,var(--sage)_70%,transparent)]"
+                          transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                        />
+                      )}
+                      <Icon
+                        className={`relative z-10 w-4 h-4 transition-transform duration-200 ${
+                          isActive ? "" : "group-hover:scale-110"
+                        }`}
+                        strokeWidth={isActive ? 2.2 : 1.75}
+                      />
+                      <span className="relative z-10">{label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
+            </div>
           </Tabs>
 
           <div className="order-1 sm:order-2 flex items-center justify-end gap-1 sm:absolute sm:right-4 md:right-6 sm:top-1/2 sm:-translate-y-1/2">
