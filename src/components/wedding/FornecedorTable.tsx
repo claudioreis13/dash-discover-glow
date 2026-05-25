@@ -173,9 +173,14 @@ export function FornecedorTable() {
               </SelectContent>
             </Select>
           </div>
-          <Button onClick={openNew}>
-            <Plus className="w-4 h-4 mr-1" /> Novo fornecedor
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => openNew("avulso")}>
+              <ShoppingBag className="w-4 h-4 mr-1" /> Compra avulsa
+            </Button>
+            <Button onClick={() => openNew("fornecedor")}>
+              <Plus className="w-4 h-4 mr-1" /> Novo fornecedor
+            </Button>
+          </div>
         </div>
 
         <div className="rounded-lg border border-border/60 overflow-hidden">
