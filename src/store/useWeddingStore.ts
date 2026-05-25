@@ -101,6 +101,21 @@ const DEFAULT_SETTINGS: Settings = {
   dataCasamento: "",
 };
 
+function settingsToRow(
+  userId: string,
+  settings: Settings,
+  orcamentoTotal: number,
+  darkMode: boolean,
+) {
+  return {
+    user_id: userId,
+    noivos: settings.noivos || "Casal",
+    data_casamento: settings.dataCasamento || null,
+    orcamento_total: orcamentoTotal,
+    dark_mode: darkMode,
+  } as never;
+}
+
 export const useWeddingStore = create<WeddingStore>()((set, get) => ({
   fornecedores: [],
   orcamentoTotal: 45000,
@@ -216,7 +231,11 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
     const userId = get().userId;
     set({ orcamentoTotal: v });
     if (userId) {
-      void supabase.from("user_settings").update({ orcamento_total: v }).eq("user_id", userId);
+      const state = get();
+      void supabase.from("user_settings").upsert(
+        settingsToRow(userId, state.settings, v, state.darkMode),
+        { onConflict: "user_id" },
+      );
     }
   },
 
@@ -224,12 +243,11 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
     const userId = get().userId;
     set((state) => ({ settings: { ...state.settings, ...s } }));
     if (userId) {
-      const payload: Record<string, unknown> = {};
-      if (s.noivos !== undefined) payload.noivos = s.noivos;
-      if (s.dataCasamento !== undefined) payload.data_casamento = s.dataCasamento || null;
-      if (Object.keys(payload).length > 0) {
-        void supabase.from("user_settings").update(payload as never).eq("user_id", userId);
-      }
+      const state = get();
+      void supabase.from("user_settings").upsert(
+        settingsToRow(userId, state.settings, state.orcamentoTotal, state.darkMode),
+        { onConflict: "user_id" },
+      );
     }
   },
 
@@ -238,7 +256,11 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
     const next = !get().darkMode;
     set({ darkMode: next });
     if (userId) {
-      void supabase.from("user_settings").update({ dark_mode: next }).eq("user_id", userId);
+      const state = get();
+      void supabase.from("user_settings").upsert(
+        settingsToRow(userId, state.settings, state.orcamentoTotal, next),
+        { onConflict: "user_id" },
+      );
     }
   },
 }));
