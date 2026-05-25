@@ -98,7 +98,7 @@ export function EmptyState() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="max-w-3xl mx-auto py-6 md:py-10 space-y-10 md:space-y-14"
+        className="max-w-3xl mx-auto py-4 sm:py-6 md:py-10 space-y-8 sm:space-y-10 md:space-y-14"
       >
         {/* Hero — Emotional Welcome */}
         <div className="text-center space-y-4">
@@ -110,7 +110,7 @@ export function EmptyState() {
           >
             <Heart className="w-6 h-6 text-blush" fill="currentColor" />
           </motion.div>
-          <h1 className="font-serif text-4xl md:text-5xl font-semibold tracking-tight text-foreground">
+          <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-foreground leading-tight px-2">
             Bem-vindos, {settings.noivos}
           </h1>
           <p className="text-base md:text-lg text-muted-foreground max-w-md mx-auto leading-relaxed">
@@ -140,7 +140,7 @@ export function EmptyState() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.4 }}
-          className="relative overflow-hidden bg-card border border-sage/40 rounded-3xl p-6 md:p-10 text-center shadow-[0_10px_40px_-15px_color-mix(in_oklab,var(--sage)_40%,transparent)]"
+          className="relative overflow-hidden bg-card border border-sage/40 rounded-2xl sm:rounded-3xl p-5 sm:p-6 md:p-10 text-center shadow-[0_10px_40px_-15px_color-mix(in_oklab,var(--sage)_40%,transparent)]"
         >
           <div
             aria-hidden
@@ -148,7 +148,7 @@ export function EmptyState() {
           />
           <div className="relative z-10 max-w-sm mx-auto space-y-6">
             <div className="space-y-2">
-              <h2 className="font-serif text-xl sm:text-2xl md:text-3xl font-semibold whitespace-nowrap">
+              <h2 className="font-serif text-2xl md:text-3xl font-semibold leading-tight">
                 {hasFornecedores ? "Continue construindo" : "Sua jornada começa agora"}
               </h2>
               <p className="text-sm text-muted-foreground leading-relaxed">
@@ -160,10 +160,10 @@ export function EmptyState() {
             <Button
               size="lg"
               onClick={() => start()}
-              className="bg-sage text-sage-foreground hover:bg-sage/90 rounded-full px-7 shadow-md"
+              className="bg-sage text-sage-foreground hover:bg-sage/90 rounded-full px-5 sm:px-7 shadow-md w-full sm:w-auto h-12 sm:h-11 text-sm"
             >
-              <Plus className="w-4 h-4 mr-1.5" />
-              {hasFornecedores ? "Cadastrar novo fornecedor" : "Cadastrar primeiro fornecedor"}
+              <Plus className="w-4 h-4 mr-1.5 shrink-0" />
+              <span className="truncate">{hasFornecedores ? "Cadastrar novo fornecedor" : "Cadastrar primeiro fornecedor"}</span>
             </Button>
           </div>
         </motion.div>

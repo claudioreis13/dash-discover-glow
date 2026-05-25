@@ -50,20 +50,20 @@ export function HeroCard() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <Card className="p-6 bg-gradient-to-br from-primary/8 via-card to-accent/30 border-primary/20 overflow-hidden relative">
+      <Card className="p-5 sm:p-6 bg-gradient-to-br from-primary/8 via-card to-accent/30 border-primary/20 overflow-hidden relative">
         <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-primary/5 blur-2xl" />
 
-        <div className="relative grid md:grid-cols-[1fr_auto] gap-6 items-center">
+        <div className="relative grid md:grid-cols-[1fr_auto] gap-5 md:gap-6 md:items-center">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Heart className="w-4 h-4 text-primary" />
-              <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <p className="text-[11px] sm:text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 Saldo disponível
               </p>
             </div>
             <div>
               <p
-                className={`text-4xl md:text-5xl font-semibold tabular-nums ${
+                className={`text-3xl sm:text-4xl md:text-5xl font-semibold tabular-nums break-words ${
                   dashboard.saldoRestante < 0
                     ? "text-destructive"
                     : "text-foreground"
@@ -97,8 +97,8 @@ export function HeroCard() {
             </div>
           </div>
 
-          <div className="md:border-l md:pl-6 md:border-border/60">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider">
+          <div className="pt-4 border-t border-border/60 md:pt-0 md:border-t-0 md:border-l md:pl-6 md:border-border/60">
+            <p className="text-[11px] sm:text-xs text-muted-foreground uppercase tracking-wider">
               Ritmo
             </p>
             <p
@@ -108,7 +108,7 @@ export function HeroCard() {
             >
               {adiantado ? "Em dia" : "Atrás"}
             </p>
-            <p className="text-xs text-muted-foreground mt-1 max-w-[180px]">
+            <p className="text-xs text-muted-foreground mt-1 md:max-w-[180px]">
               {adiantado
                 ? "Pagamentos acompanham o cronograma."
                 : `Pagamentos ${(pctTempo - pctFin).toFixed(0)}pp atrás do tempo passado.`}
