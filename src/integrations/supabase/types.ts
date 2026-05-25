@@ -14,7 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      fornecedores: {
+        Row: {
+          categoria: string
+          contato: string | null
+          created_at: string
+          data_cont: string | null
+          email: string | null
+          id: string
+          nome: string
+          observacoes: string
+          parcelas: Json
+          prioridade: string
+          status: string
+          tipo: string | null
+          updated_at: string
+          user_id: string
+          valor_total: number
+          vencimento: string | null
+        }
+        Insert: {
+          categoria: string
+          contato?: string | null
+          created_at?: string
+          data_cont?: string | null
+          email?: string | null
+          id?: string
+          nome: string
+          observacoes?: string
+          parcelas?: Json
+          prioridade?: string
+          status?: string
+          tipo?: string | null
+          updated_at?: string
+          user_id: string
+          valor_total?: number
+          vencimento?: string | null
+        }
+        Update: {
+          categoria?: string
+          contato?: string | null
+          created_at?: string
+          data_cont?: string | null
+          email?: string | null
+          id?: string
+          nome?: string
+          observacoes?: string
+          parcelas?: Json
+          prioridade?: string
+          status?: string
+          tipo?: string | null
+          updated_at?: string
+          user_id?: string
+          valor_total?: number
+          vencimento?: string | null
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          dark_mode: boolean
+          data_casamento: string | null
+          noivos: string
+          orcamento_total: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          dark_mode?: boolean
+          data_casamento?: string | null
+          noivos?: string
+          orcamento_total?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          dark_mode?: boolean
+          data_casamento?: string | null
+          noivos?: string
+          orcamento_total?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
