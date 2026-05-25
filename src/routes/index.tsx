@@ -48,8 +48,20 @@ function WeddingDashboard() {
     setOrcamentoDraft(String(orcamentoTotal));
   }, [settings, orcamentoTotal]);
 
+  const today = new Date().toISOString().slice(0, 10);
+
   const handleSaveSettings = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (settingsDraft.dataCasamento) {
+      const parsed = new Date(settingsDraft.dataCasamento);
+      const year = parsed.getUTCFullYear();
+      if (isNaN(parsed.getTime()) || year < 2000 || year > 2100) {
+        toast.error("Data do casamento inválida. Use o formato AAAA-MM-DD.");
+        return;
+      }
+    }
+
     setIsSavingSettings(true);
     const saved = await saveSettings(settingsDraft, Number(orcamentoDraft) || 0);
     setIsSavingSettings(false);
@@ -113,6 +125,8 @@ function WeddingDashboard() {
                     <Input
                       id="data"
                       type="date"
+                      min={today}
+                      max="2100-12-31"
                       value={settingsDraft.dataCasamento}
                       onChange={(e) =>
                         setSettingsDraft((current) => ({
