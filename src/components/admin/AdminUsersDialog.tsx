@@ -4,6 +4,7 @@ import {
   listUsers,
   createUser,
   updateUserPassword,
+  updateUsername,
   setUserRole,
   deleteUser,
 } from "@/lib/admin-users.functions";
@@ -25,12 +26,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Trash2, KeyRound, UserPlus, Users } from "lucide-react";
+import { Trash2, KeyRound, UserPlus, Users, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 type AdminUser = {
   id: string;
   email: string;
+  username: string;
   createdAt: string;
   roles: string[];
 };
@@ -43,6 +45,7 @@ export function AdminUsersDialog({ currentUserId }: { currentUserId: string }) {
   const list = useServerFn(listUsers);
   const create = useServerFn(createUser);
   const updatePwd = useServerFn(updateUserPassword);
+  const updateName = useServerFn(updateUsername);
   const setRole = useServerFn(setUserRole);
   const del = useServerFn(deleteUser);
 
@@ -63,17 +66,25 @@ export function AdminUsersDialog({ currentUserId }: { currentUserId: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  // create form
   const [newEmail, setNewEmail] = useState("");
+  const [newUsername, setNewUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [newRole, setNewRole] = useState<"admin" | "user">("user");
 
   const onCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await create({ data: { email: newEmail, password: newPassword, role: newRole } });
+      await create({
+        data: {
+          email: newEmail,
+          username: newUsername,
+          password: newPassword,
+          role: newRole,
+        },
+      });
       toast.success("Usuário criado");
       setNewEmail("");
+      setNewUsername("");
       setNewPassword("");
       setNewRole("user");
       await refresh();
@@ -103,8 +114,20 @@ export function AdminUsersDialog({ currentUserId }: { currentUserId: string }) {
     }
   };
 
-  const onDelete = async (userId: string, email: string) => {
-    if (!window.confirm(`Remover ${email}?`)) return;
+  const onEditUsername = async (userId: string, current: string) => {
+    const username = window.prompt("Novo nome de usuário:", current);
+    if (!username || username.trim() === current) return;
+    try {
+      await updateName({ data: { userId, username: username.trim() } });
+      toast.success("Usuário atualizado");
+      await refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Erro");
+    }
+  };
+
+  const onDelete = async (userId: string, label: string) => {
+    if (!window.confirm(`Remover ${label}?`)) return;
     try {
       await del({ data: { userId } });
       toast.success("Usuário removido");
@@ -132,9 +155,21 @@ export function AdminUsersDialog({ currentUserId }: { currentUserId: string }) {
             <UserPlus className="w-4 h-4" />
             Criar novo usuário
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <div>
-              <Label htmlFor="ne">E-mail</Label>
+              <Label htmlFor="nu">Usuário</Label>
+              <Input
+                id="nu"
+                required
+                minLength={3}
+                maxLength={32}
+                autoCapitalize="none"
+                value={newUsername}
+                onChange={(e) => setNewUsername(e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="ne">E-mail (recuperação)</Label>
               <Input
                 id="ne"
                 type="email"
@@ -181,15 +216,15 @@ export function AdminUsersDialog({ currentUserId }: { currentUserId: string }) {
                 className="flex items-center gap-2 py-2 px-2 border-b border-border last:border-0"
               >
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{u.email}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {isSelf ? "você" : "criado em " + new Date(u.createdAt).toLocaleDateString()}
+                  <p className="text-sm font-medium truncate">
+                    {u.username || "(sem usuário)"}
+                    {isSelf && <span className="ml-2 text-xs text-muted-foreground">(você)</span>}
                   </p>
+                  <p className="text-xs text-muted-foreground truncate">{u.email}</p>
                 </div>
                 <Select
                   value={role}
                   onValueChange={(v) => onChangeRole(u.id, v as "admin" | "user")}
-                  disabled={isSelf}
                 >
                   <SelectTrigger className="w-32 h-8">
                     <SelectValue />
@@ -202,6 +237,14 @@ export function AdminUsersDialog({ currentUserId }: { currentUserId: string }) {
                 <Button
                   variant="ghost"
                   size="icon"
+                  onClick={() => onEditUsername(u.id, u.username)}
+                  aria-label="Editar usuário"
+                >
+                  <Pencil className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => onResetPassword(u.id)}
                   aria-label="Redefinir senha"
                 >
@@ -210,7 +253,7 @@ export function AdminUsersDialog({ currentUserId }: { currentUserId: string }) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => onDelete(u.id, u.email)}
+                  onClick={() => onDelete(u.id, u.username || u.email)}
                   disabled={isSelf}
                   aria-label="Remover"
                 >
