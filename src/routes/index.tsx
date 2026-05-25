@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/wedding/EmptyState";
 import { QuickAddButton } from "@/components/wedding/QuickAddButton";
 import { TopNav, type TabValue } from "@/components/wedding/TopNav";
 import { SettingsDialog } from "@/components/wedding/SettingsDialog";
+import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -39,7 +40,8 @@ function WeddingDashboard() {
             <TopNav value={tab} onChange={setTab} />
           </div>
 
-          <div className="order-1 sm:order-2 flex items-center justify-end gap-1 sm:absolute sm:right-4 md:right-6 sm:top-1/2 sm:-translate-y-1/2">
+          <div className="order-1 sm:order-2 flex items-center justify-end gap-2 sm:absolute sm:right-4 md:right-6 sm:top-1/2 sm:-translate-y-1/2">
+            <AnimatedThemeToggler onToggle={() => useWeddingStore.getState().toggleDarkMode()} />
             <SettingsDialog />
           </div>
         </div>
