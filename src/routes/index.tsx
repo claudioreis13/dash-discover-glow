@@ -119,6 +119,14 @@ function WeddingDashboard() {
                 <Moon className="w-4 h-4" />
               )}
             </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => void supabase.auth.signOut()}
+              aria-label="Sair"
+            >
+              <LogOut className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </header>
