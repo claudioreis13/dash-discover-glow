@@ -93,7 +93,7 @@ function fornecedorToRow(f: Fornecedor, userId: string) {
     contato: f.contato ?? null,
     email: f.email ?? null,
     tipo: f.tipo ?? null,
-  };
+  } as never;
 }
 
 const DEFAULT_SETTINGS: Settings = {
