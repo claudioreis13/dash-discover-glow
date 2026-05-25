@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import {
@@ -74,10 +74,11 @@ export function EmptyState() {
 
   const { settings } = useWeddingStore();
   const dataCasamento = parseISO(settings.dataCasamento);
-  const dias = Math.max(
-    0,
-    differenceInCalendarDays(dataCasamento, new Date()),
-  );
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const dias = mounted
+    ? Math.max(0, differenceInCalendarDays(dataCasamento, new Date()))
+    : 0;
 
   const start = (categoria?: CategoriaType) => {
     setCat(categoria);
