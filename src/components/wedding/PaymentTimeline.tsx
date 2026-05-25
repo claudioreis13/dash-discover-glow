@@ -44,10 +44,7 @@ export function PaymentTimeline({ items }: { items: Parcela[] }) {
                   <Checkbox
                     id={id}
                     className="mt-0.5"
-                    onCheckedChange={() => {
-                      toggleParcelaPaga(p.fornecedorId, p.numero);
-                      toast.success(`Parcela ${p.numero} marcada como paga ✓`);
-                    }}
+                    onCheckedChange={() => markPaid(p.fornecedorId, p.numero)}
                   />
                   <label
                     htmlFor={id}
