@@ -2,14 +2,19 @@ import { motion } from "motion/react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
+import { CountUp } from "./CountUp";
 
 interface Props {
   label: string;
-  valor: string;
+  valor?: string;
+  /** When provided, animates a count-up using `formatValor`. */
+  numeric?: number;
+  formatValor?: (n: number) => string;
   icon: ReactNode;
   tone?: "default" | "success" | "warning" | "destructive" | "accent";
   hint?: string;
   delay?: number;
+  className?: string;
 }
 
 const toneMap = {
@@ -23,16 +28,20 @@ const toneMap = {
 export function MetricCard({
   label,
   valor,
+  numeric,
+  formatValor,
   icon,
   tone = "default",
   hint,
   delay = 0,
+  className,
 }: Props) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      className={className}
     >
       <Card variant="stat" className="p-5 h-full flex flex-col gap-3">
         <div className="flex items-center justify-between">
@@ -50,7 +59,11 @@ export function MetricCard({
         </div>
         <div>
           <p className="text-3xl font-semibold tabular-nums text-foreground tracking-tight">
-            {valor}
+            {typeof numeric === "number" && formatValor ? (
+              <CountUp value={numeric} format={formatValor} />
+            ) : (
+              valor
+            )}
           </p>
           {hint && (
             <p className="text-xs text-muted-foreground mt-1.5">{hint}</p>
