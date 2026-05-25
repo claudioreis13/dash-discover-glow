@@ -50,6 +50,7 @@ import {
   useWeddingStore,
   totalPago,
 } from "@/store/useWeddingStore";
+import { usePagamentoCelebration } from "@/hooks/usePagamentoCelebration";
 import { formatCurrency } from "@/hooks/useFinancialCalculations";
 import {
   CATEGORIA_LABELS,
