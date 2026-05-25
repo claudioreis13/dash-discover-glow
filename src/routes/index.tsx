@@ -109,6 +109,11 @@ function WeddingDashboard() {
                     }
                   />
                 </div>
+                {isAdmin && userId && (
+                  <div className="pt-2 border-t border-border">
+                    <AdminUsersDialog currentUserId={userId} />
+                  </div>
+                )}
               </PopoverContent>
             </Popover>
             <Button
