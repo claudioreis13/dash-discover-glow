@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { useWeddingStore } from "@/store/useWeddingStore";
 import { useFinancialCalculations, formatCurrency } from "@/hooks/useFinancialCalculations";
@@ -10,14 +11,20 @@ export function HeroCard() {
   const { dashboard } = useFinancialCalculations();
 
   const dataCasamento = parseISO(settings.dataCasamento);
-  const hoje = new Date();
-  const diasRestantes = differenceInCalendarDays(dataCasamento, hoje);
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const hoje = mounted ? new Date() : dataCasamento;
+  const diasRestantes = mounted
+    ? differenceInCalendarDays(dataCasamento, hoje)
+    : 0;
 
   // Tempo: começa na contratação mais antiga (ou hoje se nenhum)
   const inicio = fornecedores.length
     ? fornecedores
         .map((f) => parseISO(f.dataCont).getTime())
-        .reduce((a, b) => Math.min(a, b), Date.now())
+        .reduce((a, b) => Math.min(a, b), hoje.getTime())
     : hoje.getTime();
   const totalDias = Math.max(
     1,
@@ -27,7 +34,7 @@ export function HeroCard() {
     0,
     differenceInCalendarDays(hoje, new Date(inicio)),
   );
-  const pctTempo = Math.min(100, (passadosDias / totalDias) * 100);
+  const pctTempo = mounted ? Math.min(100, (passadosDias / totalDias) * 100) : 0;
 
   const pctFin =
     dashboard.valorComprometido > 0
