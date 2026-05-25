@@ -180,14 +180,9 @@ export function PaymentCalendar() {
                       <Checkbox
                         id={`cal-${i.fornecedorId}-${i.numero}`}
                         checked={i.pago}
-                        onCheckedChange={() => {
-                          toggleParcelaPaga(i.fornecedorId, i.numero);
-                          toast.success(
-                            i.pago
-                              ? `Parcela desmarcada`
-                              : `Parcela ${i.numero} paga ✓`,
-                          );
-                        }}
+                        onCheckedChange={() =>
+                          markPaid(i.fornecedorId, i.numero)
+                        }
                       />
                       <label
                         htmlFor={`cal-${i.fornecedorId}-${i.numero}`}
