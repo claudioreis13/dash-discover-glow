@@ -17,6 +17,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useWeddingStore } from "@/store/useWeddingStore";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
+import { AdminUsersDialog } from "@/components/admin/AdminUsersDialog";
 import { Overview } from "@/components/wedding/Overview";
 import { FornecedorTable } from "@/components/wedding/FornecedorTable";
 import { Relatorios } from "@/components/wedding/Relatorios";
@@ -44,7 +46,9 @@ function WeddingDashboard() {
     setSettings,
     orcamentoTotal,
     setOrcamentoTotal,
+    userId,
   } = useWeddingStore();
+  const { isAdmin } = useIsAdmin(userId);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
@@ -105,6 +109,11 @@ function WeddingDashboard() {
                     }
                   />
                 </div>
+                {isAdmin && userId && (
+                  <div className="pt-2 border-t border-border">
+                    <AdminUsersDialog currentUserId={userId} />
+                  </div>
+                )}
               </PopoverContent>
             </Popover>
             <Button
