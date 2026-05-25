@@ -16,6 +16,10 @@ const buttonVariants = cva(
         secondary: "bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        sage:
+          "bg-sage text-sage-foreground shadow-sm hover:bg-sage/90 focus-visible:ring-sage/50",
+        "ghost-sage":
+          "bg-sage/15 text-foreground border border-sage/30 shadow-sm hover:bg-sage/25 focus-visible:ring-sage/50",
       },
       size: {
         default: "h-9 px-4 py-2",
