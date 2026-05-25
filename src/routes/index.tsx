@@ -53,7 +53,10 @@ function WeddingDashboard() {
   const [tab, setTab] = useState("overview");
 
   const data = parseISO(settings.dataCasamento);
-  const diasRestantes = differenceInCalendarDays(data, new Date());
+  const [diasRestantes, setDiasRestantes] = useState<number | null>(null);
+  useEffect(() => {
+    setDiasRestantes(differenceInCalendarDays(data, new Date()));
+  }, [data]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -69,7 +72,7 @@ function WeddingDashboard() {
               </h1>
               <p className="text-xs text-muted-foreground">
                 {format(data, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                {diasRestantes >= 0 && (
+                {diasRestantes !== null && diasRestantes >= 0 && (
                   <span className="ml-2 text-primary font-medium">
                     • faltam {diasRestantes} dias
                   </span>

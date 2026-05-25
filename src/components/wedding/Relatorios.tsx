@@ -25,6 +25,7 @@ export function Relatorios() {
   const porMes = new Map<string, { pago: number; previsto: number }>();
   for (const f of fornecedores) {
     for (const p of f.parcelas) {
+      if (!p.dataPagamento || p.dataPagamento.length < 7) continue;
       const key = p.dataPagamento.slice(0, 7);
       const cur = porMes.get(key) ?? { pago: 0, previsto: 0 };
       if (p.pago) cur.pago += p.valor;
@@ -34,10 +35,13 @@ export function Relatorios() {
   }
   const mesesData = Array.from(porMes.entries())
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([key, v]) => ({
-      mes: format(parseISO(key + "-01"), "MMM/yy", { locale: ptBR }),
-      ...v,
-    }));
+    .map(([key, v]) => {
+      const d = parseISO(key + "-01");
+      const mes = isNaN(d.getTime())
+        ? key
+        : format(d, "MMM/yy", { locale: ptBR });
+      return { mes, ...v };
+    });
 
   return (
     <div className="grid gap-6">
