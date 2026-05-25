@@ -1,6 +1,13 @@
 import { create } from "zustand";
-import { supabase } from "@/integrations/supabase/client";
 import type { Fornecedor, StatusType } from "@/types/wedding";
+import {
+  loadWeddingData,
+  createFornecedor as sfCreateFornecedor,
+  updateFornecedor as sfUpdateFornecedor,
+  deleteFornecedor as sfDeleteFornecedor,
+  updateFornecedorParcelas,
+  saveUserSettings,
+} from "@/lib/wedding.functions";
 
 interface Settings {
   noivos: string;
@@ -78,7 +85,6 @@ export function computeStatus(f: Pick<Fornecedor, "parcelas">): StatusType {
   return "parcial";
 }
 
-// DB row → Fornecedor
 type FornecedorRow = {
   id: string;
   nome: string;
@@ -113,44 +119,10 @@ function rowToFornecedor(r: FornecedorRow): Fornecedor {
   };
 }
 
-function fornecedorToRow(f: Fornecedor, userId: string) {
-  return {
-    id: f.id,
-    user_id: userId,
-    nome: f.nome,
-    categoria: f.categoria,
-    valor_total: f.valorTotal,
-    data_cont: f.dataCont || null,
-    vencimento: f.vencimento || null,
-    parcelas: f.parcelas,
-    status: f.status,
-    prioridade: f.prioridade,
-    observacoes: f.observacoes ?? "",
-    contato: f.contato ?? null,
-    email: f.email ?? null,
-    tipo: f.tipo ?? null,
-  } as never;
-}
-
 const DEFAULT_SETTINGS: Settings = {
   noivos: "Casal",
   dataCasamento: "",
 };
-
-function settingsToRow(
-  userId: string,
-  settings: Settings,
-  orcamentoTotal: number,
-  darkMode: boolean,
-) {
-  return {
-    user_id: userId,
-    noivos: settings.noivos || "Casal",
-    data_casamento: settings.dataCasamento || null,
-    orcamento_total: orcamentoTotal,
-    dark_mode: darkMode,
-  } as never;
-}
 
 export const useWeddingStore = create<WeddingStore>()((set, get) => ({
   fornecedores: [],
@@ -193,30 +165,23 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
 
   loadForUser: async (userId) => {
     set({ userId, hydrated: false, activity: loadActivity(userId) });
-    const [fornRes, settingsRes] = await Promise.all([
-      supabase.from("fornecedores").select("*").order("created_at", { ascending: true }),
-      supabase.from("user_settings").select("*").eq("user_id", userId).maybeSingle(),
-    ]);
-
-    const fornecedores = (fornRes.data ?? []).map((r) => rowToFornecedor(r as FornecedorRow));
-
-    let settings = DEFAULT_SETTINGS;
-    let orcamentoTotal = 45000;
-    let darkMode = false;
-
-    if (settingsRes.data) {
-      settings = {
-        noivos: settingsRes.data.noivos ?? "Casal",
-        dataCasamento: settingsRes.data.data_casamento ?? "",
+    try {
+      const res = await loadWeddingData();
+      const fornecedores = (res.fornecedores ?? []).map((r) =>
+        rowToFornecedor(r as FornecedorRow),
+      );
+      const s = res.settings;
+      const settings: Settings = {
+        noivos: s?.noivos ?? "Casal",
+        dataCasamento: s?.data_casamento ?? "",
       };
-      orcamentoTotal = Number(settingsRes.data.orcamento_total) || 45000;
-      darkMode = !!settingsRes.data.dark_mode;
-    } else {
-      // ensure row exists
-      await supabase.from("user_settings").insert({ user_id: userId });
+      const orcamentoTotal = Number(s?.orcamento_total) || 45000;
+      const darkMode = !!s?.dark_mode;
+      set({ fornecedores, settings, orcamentoTotal, darkMode, hydrated: true });
+    } catch (e) {
+      console.error("[wedding] loadForUser failed", e);
+      set({ hydrated: true });
     }
-
-    set({ fornecedores, settings, orcamentoTotal, darkMode, hydrated: true });
   },
 
   addFornecedor: async (f) => {
@@ -232,7 +197,11 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
           ? `Compra avulsa adicionada: ${newF.nome}`
           : `Fornecedor adicionado: ${newF.nome}`,
     });
-    await supabase.from("fornecedores").insert(fornecedorToRow(newF, userId));
+    try {
+      await sfCreateFornecedor({ data: newF });
+    } catch (e) {
+      console.error("[wedding] addFornecedor failed", e);
+    }
   },
 
   restoreFornecedor: async (f) => {
@@ -244,7 +213,11 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
       fornecedorNome: f.nome,
       description: `"${f.nome}" restaurado`,
     });
-    await supabase.from("fornecedores").insert(fornecedorToRow(f, userId));
+    try {
+      await sfCreateFornecedor({ data: f });
+    } catch (e) {
+      console.error("[wedding] restoreFornecedor failed", e);
+    }
   },
 
   updateFornecedor: async (id, updates) => {
@@ -267,13 +240,11 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
         fornecedorNome: u.nome,
         description: `${u.nome} atualizado`,
       });
-      const row = fornecedorToRow(u, userId) as Record<string, unknown>;
-      delete row.id;
-      delete row.user_id;
-      await supabase
-        .from("fornecedores")
-        .update(row as never)
-        .eq("id", id);
+      try {
+        await sfUpdateFornecedor({ data: u });
+      } catch (e) {
+        console.error("[wedding] updateFornecedor failed", e);
+      }
     }
   },
 
@@ -287,7 +258,11 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
         description: `${target.nome} removido`,
       });
     }
-    await supabase.from("fornecedores").delete().eq("id", id);
+    try {
+      await sfDeleteFornecedor({ data: { id } });
+    } catch (e) {
+      console.error("[wedding] deleteFornecedor failed", e);
+    }
   },
 
   toggleParcelaPaga: async (fornecedorId, numero) => {
@@ -318,24 +293,29 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
           ? `Parcela #${numero} de ${u.nome} desmarcada`
           : `Parcela #${numero} de ${u.nome} paga${parcela ? ` (R$ ${parcela.valor.toLocaleString("pt-BR")})` : ""}`,
       });
-      await supabase
-        .from("fornecedores")
-        .update({ parcelas: u.parcelas as unknown as object, status: u.status } as never)
-        .eq("id", fornecedorId);
+      try {
+        await updateFornecedorParcelas({
+          data: { id: fornecedorId, parcelas: u.parcelas, status: u.status },
+        });
+      } catch (e) {
+        console.error("[wedding] toggleParcelaPaga failed", e);
+      }
     }
   },
-
 
   setOrcamentoTotal: (v) => {
     const userId = get().userId;
     set({ orcamentoTotal: v });
     if (userId) {
       const state = get();
-      void supabase
-        .from("user_settings")
-        .upsert(settingsToRow(userId, state.settings, v, state.darkMode), {
-          onConflict: "user_id",
-        });
+      void saveUserSettings({
+        data: {
+          noivos: state.settings.noivos || "Casal",
+          dataCasamento: state.settings.dataCasamento,
+          orcamentoTotal: v,
+          darkMode: state.darkMode,
+        },
+      }).catch((e) => console.error("[wedding] setOrcamentoTotal failed", e));
     }
   },
 
@@ -344,33 +324,39 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
     set((state) => ({ settings: { ...state.settings, ...s } }));
     if (userId) {
       const state = get();
-      void supabase
-        .from("user_settings")
-        .upsert(settingsToRow(userId, state.settings, state.orcamentoTotal, state.darkMode), {
-          onConflict: "user_id",
-        });
+      void saveUserSettings({
+        data: {
+          noivos: state.settings.noivos || "Casal",
+          dataCasamento: state.settings.dataCasamento,
+          orcamentoTotal: state.orcamentoTotal,
+          darkMode: state.darkMode,
+        },
+      }).catch((e) => console.error("[wedding] setSettings failed", e));
     }
   },
 
   saveSettings: async (nextSettings, nextOrcamentoTotal) => {
     const userId = get().userId;
     if (!userId) return false;
-
     const normalizedSettings = {
       noivos: nextSettings.noivos || "Casal",
       dataCasamento: nextSettings.dataCasamento,
     };
-
-    const { error } = await supabase
-      .from("user_settings")
-      .upsert(settingsToRow(userId, normalizedSettings, nextOrcamentoTotal, get().darkMode), {
-        onConflict: "user_id",
+    try {
+      await saveUserSettings({
+        data: {
+          noivos: normalizedSettings.noivos,
+          dataCasamento: normalizedSettings.dataCasamento,
+          orcamentoTotal: nextOrcamentoTotal,
+          darkMode: get().darkMode,
+        },
       });
-
-    if (error) return false;
-
-    set({ settings: normalizedSettings, orcamentoTotal: nextOrcamentoTotal });
-    return true;
+      set({ settings: normalizedSettings, orcamentoTotal: nextOrcamentoTotal });
+      return true;
+    } catch (e) {
+      console.error("[wedding] saveSettings failed", e);
+      return false;
+    }
   },
 
   toggleDarkMode: () => {
@@ -379,11 +365,14 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
     set({ darkMode: next });
     if (userId) {
       const state = get();
-      void supabase
-        .from("user_settings")
-        .upsert(settingsToRow(userId, state.settings, state.orcamentoTotal, next), {
-          onConflict: "user_id",
-        });
+      void saveUserSettings({
+        data: {
+          noivos: state.settings.noivos || "Casal",
+          dataCasamento: state.settings.dataCasamento,
+          orcamentoTotal: state.orcamentoTotal,
+          darkMode: next,
+        },
+      }).catch((e) => console.error("[wedding] toggleDarkMode failed", e));
     }
   },
 }));
