@@ -171,22 +171,6 @@ export function SettingsDialog() {
             </div>
 
             <div className="space-y-2">
-              <div className="flex items-center justify-between p-3 bg-muted/40 rounded-xl border border-border/60 hover:bg-muted/60 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="p-1 bg-card rounded-lg shadow-sm text-sage border border-border/40 flex items-center justify-center">
-                    <AnimatedThemeToggler onToggle={() => toggleDarkMode()} />
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium text-foreground leading-tight">
-                      Modo escuro
-                    </span>
-                    <span className="text-[11px] text-muted-foreground">
-                      Toque no ícone para alternar
-                    </span>
-                  </div>
-                </div>
-              </div>
-
               {isAdmin && userId && (
                 <AdminUsersDialog
                   currentUserId={userId}
