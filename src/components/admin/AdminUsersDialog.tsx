@@ -37,7 +37,13 @@ type AdminUser = {
   roles: string[];
 };
 
-export function AdminUsersDialog({ currentUserId }: { currentUserId: string }) {
+export function AdminUsersDialog({
+  currentUserId,
+  trigger,
+}: {
+  currentUserId: string;
+  trigger?: React.ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [loading, setLoading] = useState(false);
@@ -140,10 +146,12 @@ export function AdminUsersDialog({ currentUserId }: { currentUserId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full justify-start gap-2">
-          <Users className="w-4 h-4" />
-          Gerenciar usuários
-        </Button>
+        {trigger ?? (
+          <Button variant="outline" className="w-full justify-start gap-2">
+            <Users className="w-4 h-4" />
+            Gerenciar usuários
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
