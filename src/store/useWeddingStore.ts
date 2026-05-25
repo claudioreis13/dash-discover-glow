@@ -175,9 +175,11 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => ({
       }),
     }));
     if (updated) {
-      const row = fornecedorToRow(updated, userId);
-      const { id: _id, user_id: _u, ...rest } = row;
-      await supabase.from("fornecedores").update(rest).eq("id", id);
+      const u: Fornecedor = updated;
+      const row = fornecedorToRow(u, userId) as Record<string, unknown>;
+      delete row.id;
+      delete row.user_id;
+      await supabase.from("fornecedores").update(row as never).eq("id", id);
     }
   },
 
