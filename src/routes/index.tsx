@@ -59,26 +59,30 @@ function WeddingDashboard() {
 
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-[env(safe-area-inset-bottom)]">
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 relative flex items-center justify-center">
-          <Tabs value={tab} onValueChange={setTab}>
-            <TabsList>
-              <TabsTrigger value="inicio">Início</TabsTrigger>
-              <TabsTrigger value="overview">Visão geral</TabsTrigger>
-              <TabsTrigger value="fornecedores">Fornecedores</TabsTrigger>
-              <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-3 flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 sm:gap-0 relative">
+          <Tabs value={tab} onValueChange={setTab} className="w-full sm:w-auto order-2 sm:order-1">
+            <TabsList className="w-full sm:w-auto grid grid-cols-4 sm:inline-flex h-9">
+              <TabsTrigger value="inicio" className="text-xs sm:text-sm px-2">Início</TabsTrigger>
+              <TabsTrigger value="overview" className="text-xs sm:text-sm px-2">Visão</TabsTrigger>
+              <TabsTrigger value="fornecedores" className="text-xs sm:text-sm px-2">Fornec.</TabsTrigger>
+              <TabsTrigger value="relatorios" className="text-xs sm:text-sm px-2">Relatórios</TabsTrigger>
             </TabsList>
           </Tabs>
 
-          <div className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 flex items-center gap-1">
+          <div className="order-1 sm:order-2 flex items-center justify-end gap-1 sm:absolute sm:right-4 md:right-6 sm:top-1/2 sm:-translate-y-1/2">
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="ghost" size="icon" aria-label="Configurações">
+                <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Configurações">
                   <Settings className="w-4 h-4" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent align="end" className="w-72 space-y-3">
+              <PopoverContent
+                align="end"
+                sideOffset={8}
+                className="w-[calc(100vw-1.5rem)] sm:w-72 space-y-3"
+              >
                 <div>
                   <Label htmlFor="noivos">Noivos</Label>
                   <Input
@@ -103,6 +107,7 @@ function WeddingDashboard() {
                   <Input
                     id="orc"
                     type="number"
+                    inputMode="decimal"
                     value={orcamentoTotal}
                     onChange={(e) =>
                       setOrcamentoTotal(Number(e.target.value))
@@ -119,6 +124,7 @@ function WeddingDashboard() {
             <Button
               variant="ghost"
               size="icon"
+              className="h-9 w-9"
               onClick={toggleDarkMode}
               aria-label="Alternar tema"
             >
@@ -131,6 +137,7 @@ function WeddingDashboard() {
             <Button
               variant="ghost"
               size="icon"
+              className="h-9 w-9"
               onClick={() => void supabase.auth.signOut()}
               aria-label="Sair"
             >
@@ -140,7 +147,7 @@ function WeddingDashboard() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
         <Tabs value={tab} onValueChange={setTab} className="space-y-6">
           <TabsList className="sr-only">
             <TabsTrigger value="inicio">Início</TabsTrigger>
