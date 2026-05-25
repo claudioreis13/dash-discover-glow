@@ -15,6 +15,7 @@ import { ActivityFeed } from "./ActivityFeed";
 import { PaymentCalendar } from "./PaymentCalendar";
 import { SectionHeader } from "./SectionHeader";
 import { ParcelStrip } from "./ParcelStrip";
+import { OverviewSkeleton } from "./OverviewSkeleton";
 import {
   formatCurrency,
   useFinancialCalculations,
@@ -22,12 +23,18 @@ import {
 import { useWeddingStore } from "@/store/useWeddingStore";
 import type { CategoriaType } from "@/types/wedding";
 
+
 const formatPct = (n: number) => `${n.toFixed(1)}%`;
 
 export function Overview() {
   const fornecedores = useWeddingStore((s) => s.fornecedores);
+  const hydrated = useWeddingStore((s) => s.hydrated);
   const { dashboard, gastosPorCategoria, proximasParcelas } =
     useFinancialCalculations();
+
+  if (!hydrated) {
+    return <OverviewSkeleton />;
+  }
 
   if (fornecedores.length === 0) {
     return (
@@ -41,6 +48,7 @@ export function Overview() {
       </div>
     );
   }
+
 
   const pctPago =
     dashboard.valorComprometido > 0

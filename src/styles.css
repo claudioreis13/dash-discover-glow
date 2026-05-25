@@ -222,3 +222,51 @@
   .shadow-hero { box-shadow: var(--shadow-hero); }
   .shadow-blush { box-shadow: var(--shadow-blush); }
 }
+
+@layer base {
+  /* Tinted text selection */
+  ::selection {
+    background-color: color-mix(in oklab, var(--sage) 38%, transparent);
+    color: var(--foreground);
+  }
+
+  /* Premium focus ring — sage tinted, soft halo */
+  :where(a, button, [role="button"], input, select, textarea, [tabindex]):focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--background),
+      0 0 0 4px color-mix(in oklab, var(--sage) 70%, transparent);
+    border-radius: calc(var(--radius) - 4px);
+    transition: box-shadow 160ms var(--ease-out-soft);
+  }
+
+  /* Refined scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--sage) 35%, transparent);
+    border-radius: 999px;
+    border: 2px solid var(--background);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--sage) 55%, transparent);
+  }
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+@keyframes brand-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.08); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
