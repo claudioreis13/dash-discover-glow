@@ -125,6 +125,8 @@ function WeddingDashboard() {
                     <Input
                       id="data"
                       type="date"
+                      min={today}
+                      max="2100-12-31"
                       value={settingsDraft.dataCasamento}
                       onChange={(e) =>
                         setSettingsDraft((current) => ({
