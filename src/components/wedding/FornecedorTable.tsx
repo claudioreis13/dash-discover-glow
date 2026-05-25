@@ -131,10 +131,10 @@ export function FornecedorTable() {
 
   return (
     <>
-      <Card className="p-6">
+      <Card className="p-3 sm:p-6">
         <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between mb-4">
-          <div className="flex flex-1 gap-2 items-center flex-wrap">
-            <div className="relative flex-1 min-w-[180px] max-w-xs">
+          <div className="flex flex-1 gap-2 items-stretch flex-wrap">
+            <div className="relative flex-1 min-w-[140px] sm:max-w-xs">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Buscar fornecedor..."
@@ -143,49 +143,179 @@ export function FornecedorTable() {
                 className="pl-9"
               />
             </div>
-            <Select
-              value={filterCat}
-              onValueChange={(v) => setFilterCat(v as CategoriaType | "todos")}
-            >
-              <SelectTrigger className="w-[160px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todas categorias</SelectItem>
-                {Object.entries(CATEGORIA_LABELS).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>
-                    {v}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={filterStatus}
-              onValueChange={(v) => setFilterStatus(v as StatusType | "todos")}
-            >
-              <SelectTrigger className="w-[140px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos status</SelectItem>
-                <SelectItem value="pago">Pago</SelectItem>
-                <SelectItem value="parcial">Parcial</SelectItem>
-                <SelectItem value="pendente">Pendente</SelectItem>
-                <SelectItem value="atrasado">Atrasado</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Select
+                value={filterCat}
+                onValueChange={(v) => setFilterCat(v as CategoriaType | "todos")}
+              >
+                <SelectTrigger className="flex-1 sm:w-[160px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todas categorias</SelectItem>
+                  {Object.entries(CATEGORIA_LABELS).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>
+                      {v}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select
+                value={filterStatus}
+                onValueChange={(v) => setFilterStatus(v as StatusType | "todos")}
+              >
+                <SelectTrigger className="flex-1 sm:w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="todos">Todos status</SelectItem>
+                  <SelectItem value="pago">Pago</SelectItem>
+                  <SelectItem value="parcial">Parcial</SelectItem>
+                  <SelectItem value="pendente">Pendente</SelectItem>
+                  <SelectItem value="atrasado">Atrasado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => openNew("avulso")}>
-              <ShoppingBag className="w-4 h-4 mr-1" /> Compra avulsa
+          <div className="grid grid-cols-2 md:flex gap-2">
+            <Button variant="outline" onClick={() => openNew("avulso")} className="w-full md:w-auto">
+              <ShoppingBag className="w-4 h-4 mr-1" />
+              <span className="truncate">Avulsa</span>
             </Button>
-            <Button onClick={() => openNew("fornecedor")}>
-              <Plus className="w-4 h-4 mr-1" /> Novo fornecedor
+            <Button onClick={() => openNew("fornecedor")} className="w-full md:w-auto">
+              <Plus className="w-4 h-4 mr-1" /> Novo
             </Button>
           </div>
         </div>
 
-        <div className="rounded-lg border border-border/60 overflow-hidden">
+        {/* Mobile card list */}
+        <div className="md:hidden space-y-2">
+          {filtered.length === 0 ? (
+            <div className="text-center py-10 text-sm text-muted-foreground">
+              {fornecedores.length === 0
+                ? 'Nenhum fornecedor ainda. Toque em "Novo" para começar.'
+                : "Nenhum resultado para os filtros aplicados."}
+            </div>
+          ) : (
+            filtered.map((f) => {
+              const pago = totalPago(f);
+              const pct = f.valorTotal > 0 ? (pago / f.valorTotal) * 100 : 0;
+              const isOpen = expanded.has(f.id);
+              const pagas = f.parcelas.filter((p) => p.pago).length;
+              return (
+                <div
+                  key={f.id}
+                  className="rounded-xl border border-border/60 bg-card overflow-hidden"
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleExpand(f.id)}
+                    className="w-full text-left p-3 active:bg-muted/40"
+                    aria-expanded={isOpen}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium truncate">{f.nome}</div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {CATEGORIA_LABELS[f.categoria]}
+                          {f.contato ? ` · ${f.contato}` : ""}
+                        </div>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={`${statusStyle[f.status]} shrink-0`}
+                      >
+                        {f.status}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between gap-3 mb-1.5">
+                      <span className="text-base font-semibold tabular-nums">
+                        {formatCurrency(f.valorTotal)}
+                      </span>
+                      <span className="text-xs text-muted-foreground tabular-nums">
+                        {pagas}/{f.parcelas.length} · {pct.toFixed(0)}%
+                      </span>
+                    </div>
+                    <Progress value={pct} className="h-1.5" />
+                    <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+                      <span className="inline-flex items-center gap-1">
+                        {isOpen ? (
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        ) : (
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        )}
+                        {isOpen ? "Recolher parcelas" : "Ver parcelas"}
+                      </span>
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <div className="border-t border-border/60 bg-muted/20 px-3 py-2 space-y-1">
+                      <ul className="space-y-1">
+                        {f.parcelas.map((p) => (
+                          <li
+                            key={p.numero}
+                            className="flex items-center gap-3 py-1.5 text-sm"
+                          >
+                            <Checkbox
+                              id={`mp-${f.id}-${p.numero}`}
+                              checked={p.pago}
+                              onCheckedChange={() =>
+                                markPaid(f.id, p.numero)
+                              }
+                              className="h-5 w-5"
+                            />
+                            <label
+                              htmlFor={`mp-${f.id}-${p.numero}`}
+                              className="cursor-pointer flex-1 flex items-center justify-between gap-2"
+                            >
+                              <span
+                                className={`text-xs ${
+                                  p.pago
+                                    ? "line-through text-muted-foreground"
+                                    : ""
+                                }`}
+                              >
+                                #{p.numero} ·{" "}
+                                {format(parseISO(p.dataPagamento), "dd MMM yy", {
+                                  locale: ptBR,
+                                })}
+                              </span>
+                              <span className="tabular-nums font-medium text-sm">
+                                {formatCurrency(p.valor)}
+                              </span>
+                            </label>
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="flex gap-2 pt-2 border-t border-border/60">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                          onClick={() => openEdit(f)}
+                        >
+                          <Pencil className="w-3.5 h-3.5 mr-1" /> Editar
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 text-destructive hover:text-destructive"
+                          onClick={() => setToDelete(f)}
+                        >
+                          <Trash2 className="w-3.5 h-3.5 mr-1" /> Excluir
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Desktop table */}
+        <div className="hidden md:block rounded-lg border border-border/60 overflow-hidden">
           <Table>
             <TableHeader>
               <TableRow>
@@ -329,6 +459,7 @@ export function FornecedorTable() {
           </Table>
         </div>
       </Card>
+
 
       <FornecedorDialog
         open={dialogOpen}
