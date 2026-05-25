@@ -3,11 +3,10 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatCurrency } from "@/hooks/useFinancialCalculations";
-import { useWeddingStore } from "@/store/useWeddingStore";
 import { Calendar, AlertTriangle, Clock } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { toast } from "sonner";
+import { usePagamentoCelebration } from "@/hooks/usePagamentoCelebration";
 
 interface Parcela {
   fornecedorId: string;
@@ -19,7 +18,7 @@ interface Parcela {
 }
 
 export function PaymentTimeline({ items }: { items: Parcela[] }) {
-  const toggleParcelaPaga = useWeddingStore((s) => s.toggleParcelaPaga);
+  const markPaid = usePagamentoCelebration();
   return (
     <Card className="p-6 h-full flex flex-col">
       <div className="flex items-center gap-2 mb-4">
@@ -45,10 +44,7 @@ export function PaymentTimeline({ items }: { items: Parcela[] }) {
                   <Checkbox
                     id={id}
                     className="mt-0.5"
-                    onCheckedChange={() => {
-                      toggleParcelaPaga(p.fornecedorId, p.numero);
-                      toast.success(`Parcela ${p.numero} marcada como paga ✓`);
-                    }}
+                    onCheckedChange={() => markPaid(p.fornecedorId, p.numero)}
                   />
                   <label
                     htmlFor={id}

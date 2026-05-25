@@ -22,7 +22,8 @@ import { ptBR } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
 import { useWeddingStore } from "@/store/useWeddingStore";
 import { formatCurrency } from "@/hooks/useFinancialCalculations";
-import { toast } from "sonner";
+import { usePagamentoCelebration } from "@/hooks/usePagamentoCelebration";
+
 
 interface Item {
   fornecedorId: string;
@@ -34,7 +35,8 @@ interface Item {
 }
 
 export function PaymentCalendar() {
-  const { fornecedores, toggleParcelaPaga } = useWeddingStore();
+  const { fornecedores } = useWeddingStore();
+  const markPaid = usePagamentoCelebration();
   const [cursor, setCursor] = useState(() => startOfMonth(new Date()));
 
   const items: Item[] = useMemo(
@@ -178,14 +180,9 @@ export function PaymentCalendar() {
                       <Checkbox
                         id={`cal-${i.fornecedorId}-${i.numero}`}
                         checked={i.pago}
-                        onCheckedChange={() => {
-                          toggleParcelaPaga(i.fornecedorId, i.numero);
-                          toast.success(
-                            i.pago
-                              ? `Parcela desmarcada`
-                              : `Parcela ${i.numero} paga ✓`,
-                          );
-                        }}
+                        onCheckedChange={() =>
+                          markPaid(i.fornecedorId, i.numero)
+                        }
                       />
                       <label
                         htmlFor={`cal-${i.fornecedorId}-${i.numero}`}

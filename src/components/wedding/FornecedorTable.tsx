@@ -50,6 +50,7 @@ import {
   useWeddingStore,
   totalPago,
 } from "@/store/useWeddingStore";
+import { usePagamentoCelebration } from "@/hooks/usePagamentoCelebration";
 import { formatCurrency } from "@/hooks/useFinancialCalculations";
 import {
   CATEGORIA_LABELS,
@@ -71,8 +72,9 @@ const statusStyle: Record<StatusType, string> = {
 };
 
 export function FornecedorTable() {
-  const { fornecedores, deleteFornecedor, restoreFornecedor, toggleParcelaPaga } =
+  const { fornecedores, deleteFornecedor, restoreFornecedor } =
     useWeddingStore();
+  const markPaid = usePagamentoCelebration();
   const [search, setSearch] = useState("");
   const [filterCat, setFilterCat] = useState<CategoriaType | "todos">("todos");
   const [filterStatus, setFilterStatus] = useState<StatusType | "todos">(
@@ -297,14 +299,9 @@ export function FornecedorTable() {
                                   <Checkbox
                                     id={`p-${f.id}-${p.numero}`}
                                     checked={p.pago}
-                                    onCheckedChange={() => {
-                                      toggleParcelaPaga(f.id, p.numero);
-                                      toast.success(
-                                        p.pago
-                                          ? `Parcela ${p.numero} desmarcada`
-                                          : `Parcela ${p.numero} paga ✓`,
-                                      );
-                                    }}
+                                    onCheckedChange={() =>
+                                      markPaid(f.id, p.numero)
+                                    }
                                   />
                                   <label
                                     htmlFor={`p-${f.id}-${p.numero}`}
