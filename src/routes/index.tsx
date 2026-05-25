@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Moon, Sun, Settings, LogOut } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Tabs,
@@ -43,9 +44,8 @@ function WeddingDashboard() {
     darkMode,
     toggleDarkMode,
     settings,
-    setSettings,
     orcamentoTotal,
-    setOrcamentoTotal,
+    saveSettings,
     userId,
   } = useWeddingStore();
   const { isAdmin } = useIsAdmin(userId);
@@ -55,6 +55,27 @@ function WeddingDashboard() {
   }, [darkMode]);
 
   const [tab, setTab] = useState("inicio");
+  const [settingsDraft, setSettingsDraft] = useState(settings);
+  const [orcamentoDraft, setOrcamentoDraft] = useState(String(orcamentoTotal));
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+
+  useEffect(() => {
+    setSettingsDraft(settings);
+    setOrcamentoDraft(String(orcamentoTotal));
+  }, [settings, orcamentoTotal]);
+
+  const handleSaveSettings = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSavingSettings(true);
+    const saved = await saveSettings(settingsDraft, Number(orcamentoDraft) || 0);
+    setIsSavingSettings(false);
+
+    if (saved) {
+      toast.success("Configurações salvas");
+    } else {
+      toast.error("Não foi possível salvar as configurações");
+    }
+  };
 
 
 
@@ -83,37 +104,48 @@ function WeddingDashboard() {
                 sideOffset={8}
                 className="w-[calc(100vw-1.5rem)] sm:w-72 space-y-3"
               >
-                <div>
-                  <Label htmlFor="noivos">Noivos</Label>
-                  <Input
-                    id="noivos"
-                    value={settings.noivos}
-                    onChange={(e) => setSettings({ noivos: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="data">Data do casamento</Label>
-                  <Input
-                    id="data"
-                    type="date"
-                    value={settings.dataCasamento}
-                    onChange={(e) =>
-                      setSettings({ dataCasamento: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="orc">Orçamento total (R$)</Label>
-                  <Input
-                    id="orc"
-                    type="number"
-                    inputMode="decimal"
-                    value={orcamentoTotal}
-                    onChange={(e) =>
-                      setOrcamentoTotal(Number(e.target.value))
-                    }
-                  />
-                </div>
+                <form onSubmit={handleSaveSettings} className="space-y-3">
+                  <div>
+                    <Label htmlFor="noivos">Noivos</Label>
+                    <Input
+                      id="noivos"
+                      value={settingsDraft.noivos}
+                      onChange={(e) =>
+                        setSettingsDraft((current) => ({
+                          ...current,
+                          noivos: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="data">Data do casamento</Label>
+                    <Input
+                      id="data"
+                      type="date"
+                      value={settingsDraft.dataCasamento}
+                      onChange={(e) =>
+                        setSettingsDraft((current) => ({
+                          ...current,
+                          dataCasamento: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="orc">Orçamento total (R$)</Label>
+                    <Input
+                      id="orc"
+                      type="number"
+                      inputMode="decimal"
+                      value={orcamentoDraft}
+                      onChange={(e) => setOrcamentoDraft(e.target.value)}
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={isSavingSettings}>
+                    {isSavingSettings ? "Salvando..." : "Salvar"}
+                  </Button>
+                </form>
                 {isAdmin && userId && (
                   <div className="pt-2 border-t border-border">
                     <AdminUsersDialog currentUserId={userId} />
