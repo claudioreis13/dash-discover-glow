@@ -51,7 +51,6 @@ function WeddingDashboard() {
   }, [darkMode]);
 
   const [tab, setTab] = useState("inicio");
-  const temFornecedores = fornecedores.length > 0;
 
 
 
