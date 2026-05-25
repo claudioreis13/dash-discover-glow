@@ -337,6 +337,7 @@ export function FornecedorTable() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         fornecedor={editing}
+        defaultTipo={dialogTipo}
       />
 
       <AlertDialog
