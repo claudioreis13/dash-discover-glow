@@ -35,7 +35,8 @@ interface Item {
 }
 
 export function PaymentCalendar() {
-  const { fornecedores, toggleParcelaPaga } = useWeddingStore();
+  const { fornecedores } = useWeddingStore();
+  const markPaid = usePagamentoCelebration();
   const [cursor, setCursor] = useState(() => startOfMonth(new Date()));
 
   const items: Item[] = useMemo(
