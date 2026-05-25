@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Heart, Moon, Sun, Settings } from "lucide-react";
+import { Moon, Sun, Settings } from "lucide-react";
 import {
   Tabs,
   TabsContent,
@@ -21,8 +21,6 @@ import { FornecedorTable } from "@/components/wedding/FornecedorTable";
 import { Relatorios } from "@/components/wedding/Relatorios";
 import { EmptyState } from "@/components/wedding/EmptyState";
 import { HeroCard } from "@/components/wedding/HeroCard";
-import { format, parseISO, differenceInCalendarDays } from "date-fns";
-import { ptBR } from "date-fns/locale";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -56,36 +54,22 @@ function WeddingDashboard() {
   const [tab, setTab] = useState("inicio");
   const temFornecedores = fornecedores.length > 0;
 
-  const data = parseISO(settings.dataCasamento);
-  const [diasRestantes, setDiasRestantes] = useState<number | null>(null);
-  useEffect(() => {
-    setDiasRestantes(differenceInCalendarDays(data, new Date()));
-  }, [data]);
+
 
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <Heart className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-base font-semibold leading-tight">
-                {settings.noivos}
-              </h1>
-              <p className="text-xs text-muted-foreground">
-                {format(data, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-                {diasRestantes !== null && diasRestantes >= 0 && (
-                  <span className="ml-2 text-primary font-medium">
-                    • faltam {diasRestantes} dias
-                  </span>
-                )}
-              </p>
-            </div>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 relative flex items-center justify-center">
+          <Tabs value={tab} onValueChange={setTab}>
+            <TabsList>
+              <TabsTrigger value="inicio">Início</TabsTrigger>
+              <TabsTrigger value="overview">Visão geral</TabsTrigger>
+              <TabsTrigger value="fornecedores">Fornecedores</TabsTrigger>
+              <TabsTrigger value="relatorios">Relatórios</TabsTrigger>
+            </TabsList>
+          </Tabs>
 
-          <div className="flex items-center gap-2">
+          <div className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 flex items-center gap-1">
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon" aria-label="Configurações">
@@ -143,7 +127,7 @@ function WeddingDashboard() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
         <Tabs value={tab} onValueChange={setTab} className="space-y-6">
-          <TabsList>
+          <TabsList className="sr-only">
             <TabsTrigger value="inicio">Início</TabsTrigger>
             <TabsTrigger value="overview">Visão geral</TabsTrigger>
             <TabsTrigger value="fornecedores">Fornecedores</TabsTrigger>
