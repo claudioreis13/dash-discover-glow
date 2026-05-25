@@ -74,23 +74,39 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Insight Dashboard: A dynamic web application for visualizing and analyzing data." },
+      { name: "theme-color", content: "#f5f0e0" },
+      { title: "Dashboard Financeiro do Casamento" },
+      { name: "description", content: "Gerencie orçamento, fornecedores e parcelas do seu casamento com elegância." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Insight Dashboard: A dynamic web application for visualizing and analyzing data." },
+      { property: "og:title", content: "Dashboard Financeiro do Casamento" },
+      { property: "og:description", content: "Gerencie orçamento, fornecedores e parcelas do seu casamento com elegância." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "Insight Dashboard: A dynamic web application for visualizing and analyzing data." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/aa9b718c-0407-44ff-ae7d-8673510dbd02/id-preview-027e83c1--cd5ea986-8502-4e24-8e49-b2cfea9a9635.lovable.app-1779665676298.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/aa9b718c-0407-44ff-ae7d-8673510dbd02/id-preview-027e83c1--cd5ea986-8502-4e24-8e49-b2cfea9a9635.lovable.app-1779665676298.png" },
+      { name: "twitter:title", content: "Dashboard Financeiro do Casamento" },
+      { name: "twitter:description", content: "Gerencie orçamento, fornecedores e parcelas do seu casamento com elegância." },
     ],
     links: [
       {
         rel: "stylesheet",
         href: appCss,
+      },
+      {
+        rel: "icon",
+        type: "image/svg+xml",
+        href:
+          "data:image/svg+xml;utf8," +
+          encodeURIComponent(
+            `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>
+  <defs>
+    <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>
+      <stop offset='0%' stop-color='%23b8c9a8'/>
+      <stop offset='100%' stop-color='%236b7a4f'/>
+    </linearGradient>
+  </defs>
+  <rect width='64' height='64' rx='14' fill='url(%23g)'/>
+  <path d='M32 46 C 18 36, 14 26, 22 21 C 27 18, 31 22, 32 25 C 33 22, 37 18, 42 21 C 50 26, 46 36, 32 46 Z' fill='%23fdf9ee' opacity='0.95'/>
+</svg>`
+          ),
       },
     ],
   }),
