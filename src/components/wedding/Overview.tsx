@@ -47,6 +47,17 @@ export function Overview() {
       ? (dashboard.valorPago / dashboard.valorComprometido) * 100
       : 0;
 
+  // Parcelas por categoria, ordenadas por data → sequência paga/pendente para o sparkline
+  const parcelasPorCategoria = new Map<CategoriaType, boolean[]>();
+  for (const f of fornecedores) {
+    const sorted = [...f.parcelas].sort((a, b) =>
+      a.dataPagamento.localeCompare(b.dataPagamento),
+    );
+    const arr = parcelasPorCategoria.get(f.categoria) ?? [];
+    arr.push(...sorted.map((p) => p.pago));
+    parcelasPorCategoria.set(f.categoria, arr);
+  }
+
   return (
     <div className="space-y-10">
       <HeroCard />
