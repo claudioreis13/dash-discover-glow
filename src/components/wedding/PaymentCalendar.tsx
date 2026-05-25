@@ -60,6 +60,19 @@ export function PaymentCalendar() {
     .filter((i) => i.pago)
     .reduce((a, i) => a + i.valor, 0);
 
+  // Heatmap: maior valor diário do mês corrente — usado para intensidade da célula
+  const maxDia = mesItems.length
+    ? Math.max(
+        ...Array.from(
+          mesItems.reduce<Map<string, number>>((acc, i) => {
+            const k = i.data.toISOString().slice(0, 10);
+            acc.set(k, (acc.get(k) ?? 0) + i.valor);
+            return acc;
+          }, new Map()).values(),
+        ),
+      )
+    : 0;
+
   const start = startOfWeek(startOfMonth(cursor), { weekStartsOn: 0 });
   const end = endOfWeek(endOfMonth(cursor), { weekStartsOn: 0 });
 
@@ -123,10 +136,24 @@ export function PaymentCalendar() {
           const cell = (
             <button
               type="button"
-              className={`relative w-full aspect-square min-h-[58px] p-1.5 rounded-lg border text-left transition
-                ${noMes ? "bg-card" : "bg-muted/30 text-muted-foreground"}
+              style={
+                noMes && totalDia > 0 && maxDia > 0
+                  ? {
+                      backgroundColor: `color-mix(in oklab, var(--sage) ${
+                        6 + (totalDia / maxDia) * 28
+                      }%, var(--card))`,
+                    }
+                  : undefined
+              }
+              className={`group relative w-full aspect-square min-h-[58px] p-1.5 rounded-lg border text-left transition-all duration-200
+                ${noMes ? "" : "bg-muted/30 text-muted-foreground"}
+                ${noMes && totalDia === 0 ? "bg-card" : ""}
                 ${isToday ? "border-primary ring-1 ring-primary/30" : "border-border/50"}
-                ${dayItems.length ? "hover:border-primary/50 cursor-pointer" : "cursor-default"}
+                ${
+                  dayItems.length
+                    ? "hover:border-sage/60 hover:shadow-soft hover:-translate-y-0.5 cursor-pointer"
+                    : "cursor-default"
+                }
               `}
               disabled={dayItems.length === 0}
             >
@@ -140,7 +167,7 @@ export function PaymentCalendar() {
                 </span>
                 {dayItems.length > 0 && (
                   <span
-                    className={`text-[9px] font-semibold px-1 rounded ${
+                    className={`text-[9px] font-semibold px-1 rounded transition-transform group-hover:scale-110 ${
                       algumAtrasado
                         ? "bg-destructive/20 text-destructive"
                         : todosPagos
@@ -212,7 +239,21 @@ export function PaymentCalendar() {
       </div>
 
       {mesItems.length > 0 && (
-        <div className="mt-4 pt-4 border-t flex items-center justify-between text-xs text-muted-foreground">
+        <div className="mt-4 pt-4 border-t flex items-center justify-between text-xs text-muted-foreground gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] uppercase tracking-wider">Intensidade</span>
+            <div className="flex items-center gap-0.5">
+              {[6, 12, 20, 28, 34].map((v) => (
+                <span
+                  key={v}
+                  className="block h-2.5 w-3 rounded-[2px] border border-border/40"
+                  style={{
+                    backgroundColor: `color-mix(in oklab, var(--sage) ${v}%, var(--card))`,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
           <span>
             {mesItems.length} parcela{mesItems.length > 1 ? "s" : ""} no mês
           </span>
