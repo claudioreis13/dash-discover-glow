@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
+import { motion } from "motion/react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Moon, Sun, Settings, LogOut } from "lucide-react";
+import { Moon, Sun, Settings, LogOut, Home, LayoutDashboard, Users, FileBarChart } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
