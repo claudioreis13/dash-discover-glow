@@ -239,7 +239,21 @@ export function PaymentCalendar() {
       </div>
 
       {mesItems.length > 0 && (
-        <div className="mt-4 pt-4 border-t flex items-center justify-between text-xs text-muted-foreground">
+        <div className="mt-4 pt-4 border-t flex items-center justify-between text-xs text-muted-foreground gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] uppercase tracking-wider">Intensidade</span>
+            <div className="flex items-center gap-0.5">
+              {[6, 12, 20, 28, 34].map((v) => (
+                <span
+                  key={v}
+                  className="block h-2.5 w-3 rounded-[2px] border border-border/40"
+                  style={{
+                    backgroundColor: `color-mix(in oklab, var(--sage) ${v}%, var(--card))`,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
           <span>
             {mesItems.length} parcela{mesItems.length > 1 ? "s" : ""} no mês
           </span>
