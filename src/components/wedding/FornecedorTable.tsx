@@ -240,12 +240,6 @@ export function FornecedorTable() {
               )}
             </div>
           </div>
-          {hasActiveFilters && (
-            <p className="text-[11px] text-muted-foreground md:hidden -mt-1">
-              Mostrando {filtered.length} de {fornecedores.length}
-            </p>
-          )}
-          </div>
           <div className="grid grid-cols-2 md:flex gap-2">
             <Button variant="outline" onClick={() => openNew("avulso")} className="w-full md:w-auto">
               <ShoppingBag className="w-4 h-4 mr-1" />
@@ -256,6 +250,12 @@ export function FornecedorTable() {
             </Button>
           </div>
         </div>
+
+        {hasActiveFilters && (
+          <p className="text-[11px] text-muted-foreground mb-3 -mt-1">
+            Mostrando {filtered.length} de {fornecedores.length} lançamentos
+          </p>
+        )}
 
         {/* Mobile card list */}
         <div className="md:hidden space-y-2">
