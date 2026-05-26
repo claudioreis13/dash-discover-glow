@@ -4,8 +4,18 @@ import {
   totalPago,
   totalPendente,
 } from "@/store/useWeddingStore";
-import type { CategoriaType } from "@/types/wedding";
-import { CATEGORIA_LABELS } from "@/types/wedding";
+import type { CategoriaType, PagoPorType } from "@/types/wedding";
+import { CATEGORIA_LABELS, PAGO_POR_LABELS } from "@/types/wedding";
+
+export interface TerceiroBucket {
+  pagoPor: PagoPorType;
+  label: string;
+  fornecedores: { nome: string; valorTotal: number; pago: number; pendente: number }[];
+  total: number;
+  pago: number;
+  pendente: number;
+  count: number;
+}
 
 export function formatCurrency(v: number) {
   return v.toLocaleString("pt-BR", {
