@@ -19,6 +19,10 @@ export type PagoPorType =
   | "noiva"
   | "pais_noivo"
   | "pais_noiva"
+  | "tio"
+  | "tia"
+  | "madrinha"
+  | "padrinho"
   | "compartilhado";
 
 export const PAGO_POR_LABELS: Record<PagoPorType, string> = {
@@ -26,6 +30,10 @@ export const PAGO_POR_LABELS: Record<PagoPorType, string> = {
   noiva: "Noiva",
   pais_noivo: "Pais do noivo",
   pais_noiva: "Pais da noiva",
+  tio: "Tio",
+  tia: "Tia",
+  madrinha: "Madrinha",
+  padrinho: "Padrinho",
   compartilhado: "Compartilhado",
 };
 

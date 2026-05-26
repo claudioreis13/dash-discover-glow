@@ -22,6 +22,10 @@ const pagoPorEnum = z.enum([
   "noiva",
   "pais_noivo",
   "pais_noiva",
+  "tio",
+  "tia",
+  "madrinha",
+  "padrinho",
   "compartilhado",
 ]);
 
