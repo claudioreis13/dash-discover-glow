@@ -98,6 +98,8 @@ export function useFinancialCalculations() {
         valorPago,
         valorPendente,
         valorComprometido,
+        comprometidoCasal,
+        comprometidoTerceiros,
         saldoRestante,
         percentualUtilizado,
         contratosTotal: fornecedores.length,
