@@ -80,17 +80,21 @@ export function FornecedorDialog({
   const { addFornecedor, updateFornecedor } = useWeddingStore();
   const [form, setForm] = useState(() =>
     fornecedor
-      ? { ...fornecedor, tipo: fornecedor.tipo ?? "fornecedor" }
+      ? { ...fornecedor, tipo: fornecedor.tipo ?? "fornecedor", tags: fornecedor.tags ?? [] }
       : makeEmpty(defaultCategoria, defaultTipo),
   );
+  const [catSugerida, setCatSugerida] = useState<CategoriaType | null>(null);
+  const [catTocada, setCatTocada] = useState(false);
 
   useEffect(() => {
     if (open) {
       setForm(
         fornecedor
-          ? { ...fornecedor, tipo: fornecedor.tipo ?? "fornecedor" }
+          ? { ...fornecedor, tipo: fornecedor.tipo ?? "fornecedor", tags: fornecedor.tags ?? [] }
           : makeEmpty(defaultCategoria, defaultTipo),
       );
+      setCatSugerida(null);
+      setCatTocada(!!fornecedor);
     }
   }, [open, fornecedor, defaultCategoria, defaultTipo]);
 
