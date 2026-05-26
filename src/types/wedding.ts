@@ -51,7 +51,17 @@ export interface Fornecedor {
   email?: string;
   tipo?: TipoLancamento;
   pagoPor?: PagoPorType;
+  tags?: string[];
 }
+
+/** Sugestões padrão de tags livres exibidas no editor. */
+export const TAG_SUGESTOES = [
+  "essencial",
+  "supérfluo",
+  "cortável",
+  "negociar",
+  "presente",
+] as const;
 
 export const CATEGORIA_LABELS: Record<CategoriaType, string> = {
   cerimonia: "Cerimônia",

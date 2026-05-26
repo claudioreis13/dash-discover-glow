@@ -33,6 +33,8 @@ import { useWeddingStore } from "@/store/useWeddingStore";
 import { toast } from "sonner";
 import { TipoSwitch } from "./fornecedor/TipoSwitch";
 import { ParcelasEditor } from "./fornecedor/ParcelasEditor";
+import { TagsInput } from "./fornecedor/TagsInput";
+import { suggestCategoria } from "@/lib/suggestCategoria";
 
 interface Props {
   open: boolean;
@@ -61,6 +63,7 @@ function makeEmpty(
     email: "",
     tipo,
     pagoPor: undefined as PagoPorType | undefined,
+    tags: [] as string[],
     parcelas: [
       { numero: 1, valor: 0, dataPagamento: today(), pago: isAvulso },
     ] as Parcela[],
@@ -77,17 +80,21 @@ export function FornecedorDialog({
   const { addFornecedor, updateFornecedor } = useWeddingStore();
   const [form, setForm] = useState(() =>
     fornecedor
-      ? { ...fornecedor, tipo: fornecedor.tipo ?? "fornecedor" }
+      ? { ...fornecedor, tipo: fornecedor.tipo ?? "fornecedor", tags: fornecedor.tags ?? [] }
       : makeEmpty(defaultCategoria, defaultTipo),
   );
+  const [catSugerida, setCatSugerida] = useState<CategoriaType | null>(null);
+  const [catTocada, setCatTocada] = useState(false);
 
   useEffect(() => {
     if (open) {
       setForm(
         fornecedor
-          ? { ...fornecedor, tipo: fornecedor.tipo ?? "fornecedor" }
+          ? { ...fornecedor, tipo: fornecedor.tipo ?? "fornecedor", tags: fornecedor.tags ?? [] }
           : makeEmpty(defaultCategoria, defaultTipo),
       );
+      setCatSugerida(null);
+      setCatTocada(!!fornecedor);
     }
   }, [open, fornecedor, defaultCategoria, defaultTipo]);
 
@@ -172,6 +179,7 @@ export function FornecedorDialog({
       email: isAvulso ? "" : form.email,
       tipo: form.tipo,
       pagoPor: form.pagoPor,
+      tags: form.tags ?? [],
       parcelas,
     };
     if (fornecedor) {
@@ -215,17 +223,41 @@ export function FornecedorDialog({
               <Input
                 id="nome"
                 value={form.nome}
-                onChange={(e) => setField("nome", e.target.value)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setField("nome", v);
+                  if (!isAvulso && !catTocada) {
+                    const s = suggestCategoria(v);
+                    setCatSugerida(s && s !== form.categoria ? s : null);
+                  }
+                }}
                 placeholder={
                   isAvulso ? "Ex: Sapato da noiva (loja online)" : "Ex: Buffet do João"
                 }
               />
+              {catSugerida && !isAvulso && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setField("categoria", catSugerida);
+                    setCatTocada(true);
+                    setCatSugerida(null);
+                  }}
+                  className="mt-1 text-xs text-primary hover:underline"
+                >
+                  💡 Sugerir categoria: <strong>{CATEGORIA_LABELS[catSugerida]}</strong>
+                </button>
+              )}
             </div>
             <div>
               <Label>Categoria</Label>
               <Select
                 value={form.categoria}
-                onValueChange={(v) => setField("categoria", v as CategoriaType)}
+                onValueChange={(v) => {
+                  setField("categoria", v as CategoriaType);
+                  setCatTocada(true);
+                  setCatSugerida(null);
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -351,6 +383,12 @@ export function FornecedorDialog({
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="col-span-2">
+              <TagsInput
+                value={form.tags ?? []}
+                onChange={(tags) => setField("tags", tags)}
+              />
             </div>
             <div className="col-span-2">
               <Label htmlFor="obs">Observações</Label>

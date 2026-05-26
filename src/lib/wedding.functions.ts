@@ -47,6 +47,7 @@ const fornecedorSchema = z.object({
   email: z.string().max(200).optional(),
   tipo: tipoEnum.optional(),
   pagoPor: pagoPorEnum.optional(),
+  tags: z.array(z.string().trim().min(1).max(30)).max(10).optional().default([]),
 });
 
 function toRow(f: z.infer<typeof fornecedorSchema>, userId: string) {
@@ -66,6 +67,7 @@ function toRow(f: z.infer<typeof fornecedorSchema>, userId: string) {
     email: f.email ?? null,
     tipo: f.tipo ?? null,
     pago_por: f.pagoPor ?? null,
+    tags: f.tags ?? [],
   };
 }
 

@@ -54,6 +54,18 @@ export function FornecedorTableRow({
         <TableCell>
           <div className="font-medium">{f.nome}</div>
           {f.contato && <div className="text-xs text-muted-foreground">{f.contato}</div>}
+          {f.tags && f.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {f.tags.map((t) => (
+                <span
+                  key={t}
+                  className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground"
+                >
+                  #{t}
+                </span>
+              ))}
+            </div>
+          )}
         </TableCell>
         <TableCell className="text-sm text-muted-foreground">
           {CATEGORIA_LABELS[f.categoria]}
