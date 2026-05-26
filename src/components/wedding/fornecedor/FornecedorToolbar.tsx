@@ -82,6 +82,21 @@ export function FornecedorToolbar({
               <SelectItem value="atrasado">Atrasado</SelectItem>
             </SelectContent>
           </Select>
+          {availableTags.length > 0 && (
+            <Select value={filterTag} onValueChange={onFilterTagChange}>
+              <SelectTrigger className="flex-1 sm:w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todas tags</SelectItem>
+                {availableTags.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    #{t}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
           <Select value={sortBy} onValueChange={(v) => onSortByChange(v as SortBy)}>
             <SelectTrigger className="flex-1 sm:w-[170px]">
               <ArrowUpDown className="w-3.5 h-3.5 mr-1.5 text-muted-foreground shrink-0" />
