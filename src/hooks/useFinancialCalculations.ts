@@ -102,6 +102,34 @@ export function useFinancialCalculations() {
       )
       .sort((a, b) => a.data.localeCompare(b.data));
 
+    // Contribuições de terceiros detalhadas
+    const terceirosMap = new Map<PagoPorType, TerceiroBucket>();
+    for (const f of fornecedores) {
+      if (isCasal(f)) continue;
+      const key = f.pagoPor as PagoPorType;
+      const cur = terceirosMap.get(key) ?? {
+        pagoPor: key,
+        label: PAGO_POR_LABELS[key],
+        fornecedores: [],
+        total: 0,
+        pago: 0,
+        pendente: 0,
+        count: 0,
+      };
+      cur.fornecedores.push({
+        nome: f.nome,
+        valorTotal: f.valorTotal,
+        pago: totalPago(f),
+        pendente: totalPendente(f),
+      });
+      cur.total += f.valorTotal;
+      cur.pago += totalPago(f);
+      cur.pendente += totalPendente(f);
+      cur.count += 1;
+      terceirosMap.set(key, cur);
+    }
+    const terceirosDetalhes = Array.from(terceirosMap.values()).sort((a, b) => b.total - a.total);
+
     return {
       dashboard: {
         orcamentoTotal,
@@ -116,6 +144,7 @@ export function useFinancialCalculations() {
       },
       gastosPorCategoria,
       proximasParcelas: proximas,
+      terceirosDetalhes,
     };
   }, [fornecedores, orcamentoTotal]);
 }
