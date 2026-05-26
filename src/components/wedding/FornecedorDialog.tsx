@@ -179,6 +179,7 @@ export function FornecedorDialog({
       email: isAvulso ? "" : form.email,
       tipo: form.tipo,
       pagoPor: form.pagoPor,
+      tags: form.tags ?? [],
       parcelas,
     };
     if (fornecedor) {
