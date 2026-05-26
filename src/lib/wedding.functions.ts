@@ -187,3 +187,39 @@ export const saveUserSettings = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ───────────── Audit Log ─────────────
+const auditEntrySchema = z.object({
+  type: z.enum(["add", "update", "delete", "pay", "unpay"]),
+  description: z.string().trim().min(1).max(500),
+  fornecedorNome: z.string().max(200).optional(),
+});
+
+export const appendAuditLog = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => auditEntrySchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: row, error } = await supabase
+      .from("audit_log")
+      .insert({
+        user_id: userId,
+        type: data.type,
+        description: data.description,
+        fornecedor_nome: data.fornecedorNome ?? null,
+      } as never)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const clearAuditLog = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { error } = await supabase.from("audit_log").delete().eq("user_id", userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
