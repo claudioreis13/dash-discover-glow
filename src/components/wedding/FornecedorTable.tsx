@@ -79,6 +79,9 @@ export function FornecedorTable() {
           onFilterCatChange={filters.setFilterCat}
           filterStatus={filters.filterStatus}
           onFilterStatusChange={filters.setFilterStatus}
+          filterTag={filters.filterTag}
+          onFilterTagChange={filters.setFilterTag}
+          availableTags={filters.availableTags}
           sortBy={filters.sortBy}
           onSortByChange={filters.setSortBy}
           hasActiveFilters={filters.hasActiveFilters}
