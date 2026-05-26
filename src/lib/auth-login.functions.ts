@@ -4,8 +4,13 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
 
+type LoginResult =
+  | { ok: true; access_token: string; refresh_token: string }
+  | { ok: false; error: string };
+
 // Resolve a username (or email) + password into a Supabase session.
-// Runs server-side so the username -> email mapping is never exposed.
+// Returns a result envelope so expected auth failures don't surface as
+// unhandled server-function errors in the dev overlay.
 export const loginWithIdentifier = createServerFn({ method: "POST" })
   .inputValidator(
     z.object({
@@ -13,29 +18,27 @@ export const loginWithIdentifier = createServerFn({ method: "POST" })
       password: z.string().min(1).max(128),
     }).parse,
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data }): Promise<LoginResult> => {
     const raw = data.identifier.trim();
     let email = raw;
 
-    // If it's not an email, treat it as a username and resolve to an email.
     if (!raw.includes("@")) {
       const { data: row, error } = await supabaseAdmin
         .from("usernames")
         .select("user_id")
         .ilike("username", raw)
         .maybeSingle();
-      if (error) throw new Error("Erro ao validar usuário");
-      if (!row) throw new Error("Usuário ou senha inválidos");
+      if (error) return { ok: false, error: "Erro ao validar usuário" };
+      if (!row) return { ok: false, error: "Usuário ou senha inválidos" };
 
       const { data: userRes, error: uErr } =
         await supabaseAdmin.auth.admin.getUserById(row.user_id);
       if (uErr || !userRes.user?.email) {
-        throw new Error("Usuário ou senha inválidos");
+        return { ok: false, error: "Usuário ou senha inválidos" };
       }
       email = userRes.user.email;
     }
 
-    // Use a fresh anon client (no persistence) to validate the password.
     const SUPABASE_URL = process.env.SUPABASE_URL!;
     const SUPABASE_PUBLISHABLE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY!;
     const anon = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
@@ -47,10 +50,11 @@ export const loginWithIdentifier = createServerFn({ method: "POST" })
       password: data.password,
     });
     if (signErr || !signIn.session) {
-      throw new Error("Usuário ou senha inválidos");
+      return { ok: false, error: "Usuário ou senha inválidos" };
     }
 
     return {
+      ok: true,
       access_token: signIn.session.access_token,
       refresh_token: signIn.session.refresh_token,
     };
