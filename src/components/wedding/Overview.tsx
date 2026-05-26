@@ -18,6 +18,7 @@ import { ParcelStrip } from "./ParcelStrip";
 import { OverviewSkeleton } from "./OverviewSkeleton";
 import { SmartAlerts } from "./SmartAlerts";
 import { DivisaoDespesas } from "./DivisaoDespesas";
+import { ContribuicoesTerceiros } from "./ContribuicoesTerceiros";
 import {
   formatCurrency,
   useFinancialCalculations,
@@ -31,7 +32,7 @@ const formatPct = (n: number) => `${n.toFixed(1)}%`;
 export function Overview() {
   const fornecedores = useWeddingStore((s) => s.fornecedores);
   const hydrated = useWeddingStore((s) => s.hydrated);
-  const { dashboard, gastosPorCategoria, proximasParcelas } =
+  const { dashboard, gastosPorCategoria, proximasParcelas, terceirosDetalhes } =
     useFinancialCalculations();
 
   if (!hydrated) {
@@ -148,6 +149,8 @@ export function Overview() {
           <PaymentTimeline items={proximasParcelas} />
         </div>
       </section>
+
+      <ContribuicoesTerceiros buckets={terceirosDetalhes} />
 
       {/* ───────────── Cronograma ───────────── */}
       <section className="space-y-5">
