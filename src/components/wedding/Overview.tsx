@@ -18,6 +18,7 @@ import { ParcelStrip } from "./ParcelStrip";
 import { OverviewSkeleton } from "./OverviewSkeleton";
 import { SmartAlerts } from "./SmartAlerts";
 import { DivisaoDespesas } from "./DivisaoDespesas";
+import { ContribuicoesTerceiros } from "./ContribuicoesTerceiros";
 import {
   formatCurrency,
   useFinancialCalculations,
