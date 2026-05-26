@@ -385,6 +385,12 @@ export function FornecedorDialog({
               </Select>
             </div>
             <div className="col-span-2">
+              <TagsInput
+                value={form.tags ?? []}
+                onChange={(tags) => setField("tags", tags)}
+              />
+            </div>
+            <div className="col-span-2">
               <Label htmlFor="obs">Observações</Label>
               <Textarea
                 id="obs"
