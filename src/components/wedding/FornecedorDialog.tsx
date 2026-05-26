@@ -63,6 +63,7 @@ function makeEmpty(
     email: "",
     tipo,
     pagoPor: undefined as PagoPorType | undefined,
+    tags: [] as string[],
     parcelas: [
       { numero: 1, valor: 0, dataPagamento: today(), pago: isAvulso },
     ] as Parcela[],
