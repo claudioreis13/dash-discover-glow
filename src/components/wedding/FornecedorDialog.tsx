@@ -253,7 +253,11 @@ export function FornecedorDialog({
               <Label>Categoria</Label>
               <Select
                 value={form.categoria}
-                onValueChange={(v) => setField("categoria", v as CategoriaType)}
+                onValueChange={(v) => {
+                  setField("categoria", v as CategoriaType);
+                  setCatTocada(true);
+                  setCatSugerida(null);
+                }}
               >
                 <SelectTrigger>
                   <SelectValue />
