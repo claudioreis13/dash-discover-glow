@@ -105,6 +105,7 @@ type FornecedorRow = {
   email: string | null;
   tipo: string | null;
   pago_por: string | null;
+  tags: string[] | null;
 };
 
 function rowToFornecedor(r: FornecedorRow): Fornecedor {
@@ -123,6 +124,7 @@ function rowToFornecedor(r: FornecedorRow): Fornecedor {
     email: r.email ?? undefined,
     tipo: (r.tipo as Fornecedor["tipo"]) ?? undefined,
     pagoPor: (r.pago_por as Fornecedor["pagoPor"]) ?? undefined,
+    tags: Array.isArray(r.tags) ? r.tags : [],
   };
 }
 
