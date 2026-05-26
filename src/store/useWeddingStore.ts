@@ -33,28 +33,24 @@ export interface ActivityEntry {
   timestamp: number;
 }
 
-const ACTIVITY_LIMIT = 30;
-const activityKey = (userId: string) => `wedding_activity_${userId}`;
+const ACTIVITY_LIMIT = 100;
 
-function loadActivity(userId: string): ActivityEntry[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(activityKey(userId));
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.slice(0, ACTIVITY_LIMIT) : [];
-  } catch {
-    return [];
-  }
+interface AuditLogRow {
+  id: string;
+  type: string;
+  description: string;
+  fornecedor_nome: string | null;
+  created_at: string;
 }
 
-function persistActivity(userId: string, list: ActivityEntry[]) {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.setItem(activityKey(userId), JSON.stringify(list));
-  } catch {
-    /* ignore */
-  }
+function rowToActivity(r: AuditLogRow): ActivityEntry {
+  return {
+    id: r.id,
+    type: r.type as ActivityType,
+    description: r.description,
+    fornecedorNome: r.fornecedor_nome ?? undefined,
+    timestamp: new Date(r.created_at).getTime(),
+  };
 }
 
 interface WeddingStore {
