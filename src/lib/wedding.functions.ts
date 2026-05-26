@@ -17,6 +17,13 @@ const categoriaEnum = z.enum([
 const statusEnum = z.enum(["pago", "parcial", "pendente", "atrasado"]);
 const prioridadeEnum = z.enum(["alta", "média", "baixa"]);
 const tipoEnum = z.enum(["fornecedor", "avulso"]);
+const pagoPorEnum = z.enum([
+  "noivo",
+  "noiva",
+  "pais_noivo",
+  "pais_noiva",
+  "compartilhado",
+]);
 
 const parcelaSchema = z.object({
   numero: z.number().int().min(1).max(120),
@@ -39,6 +46,7 @@ const fornecedorSchema = z.object({
   contato: z.string().max(200).optional(),
   email: z.string().max(200).optional(),
   tipo: tipoEnum.optional(),
+  pagoPor: pagoPorEnum.optional(),
 });
 
 function toRow(f: z.infer<typeof fornecedorSchema>, userId: string) {
@@ -57,6 +65,7 @@ function toRow(f: z.infer<typeof fornecedorSchema>, userId: string) {
     contato: f.contato ?? null,
     email: f.email ?? null,
     tipo: f.tipo ?? null,
+    pago_por: f.pagoPor ?? null,
   };
 }
 
