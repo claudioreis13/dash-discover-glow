@@ -32,7 +32,7 @@ const formatPct = (n: number) => `${n.toFixed(1)}%`;
 export function Overview() {
   const fornecedores = useWeddingStore((s) => s.fornecedores);
   const hydrated = useWeddingStore((s) => s.hydrated);
-  const { dashboard, gastosPorCategoria, proximasParcelas } =
+  const { dashboard, gastosPorCategoria, proximasParcelas, terceirosDetalhes } =
     useFinancialCalculations();
 
   if (!hydrated) {
