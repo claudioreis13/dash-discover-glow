@@ -55,6 +55,7 @@ export type Database = {
           parcelas: Json
           prioridade: string
           status: string
+          tags: string[]
           tipo: string | null
           updated_at: string
           user_id: string
@@ -74,6 +75,7 @@ export type Database = {
           parcelas?: Json
           prioridade?: string
           status?: string
+          tags?: string[]
           tipo?: string | null
           updated_at?: string
           user_id: string
@@ -93,6 +95,7 @@ export type Database = {
           parcelas?: Json
           prioridade?: string
           status?: string
+          tags?: string[]
           tipo?: string | null
           updated_at?: string
           user_id?: string
