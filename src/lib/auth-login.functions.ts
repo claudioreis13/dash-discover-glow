@@ -4,6 +4,13 @@ import { z } from "zod";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import type { Database } from "@/integrations/supabase/types";
 
+class InvalidCredentialsError extends Error {
+  constructor() {
+    super("Usuário ou senha inválidos");
+    this.name = "InvalidCredentialsError";
+  }
+}
+
 // Resolve a username (or email) + password into a Supabase session.
 // Runs server-side so the username -> email mapping is never exposed.
 export const loginWithIdentifier = createServerFn({ method: "POST" })
