@@ -17,10 +17,15 @@ export function LoginPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      const { access_token, refresh_token } = await login({
-        data: { identifier, password },
+      const result = await login({ data: { identifier, password } });
+      if (!result.ok) {
+        toast.error(result.error);
+        return;
+      }
+      const { error } = await supabase.auth.setSession({
+        access_token: result.access_token,
+        refresh_token: result.refresh_token,
       });
-      const { error } = await supabase.auth.setSession({ access_token, refresh_token });
       if (error) throw error;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Erro ao entrar");
