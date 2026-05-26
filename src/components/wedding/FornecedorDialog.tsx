@@ -223,11 +223,31 @@ export function FornecedorDialog({
               <Input
                 id="nome"
                 value={form.nome}
-                onChange={(e) => setField("nome", e.target.value)}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setField("nome", v);
+                  if (!isAvulso && !catTocada) {
+                    const s = suggestCategoria(v);
+                    setCatSugerida(s && s !== form.categoria ? s : null);
+                  }
+                }}
                 placeholder={
                   isAvulso ? "Ex: Sapato da noiva (loja online)" : "Ex: Buffet do João"
                 }
               />
+              {catSugerida && !isAvulso && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setField("categoria", catSugerida);
+                    setCatTocada(true);
+                    setCatSugerida(null);
+                  }}
+                  className="mt-1 text-xs text-primary hover:underline"
+                >
+                  💡 Sugerir categoria: <strong>{CATEGORIA_LABELS[catSugerida]}</strong>
+                </button>
+              )}
             </div>
             <div>
               <Label>Categoria</Label>
