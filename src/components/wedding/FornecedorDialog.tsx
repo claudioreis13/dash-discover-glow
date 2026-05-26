@@ -33,6 +33,8 @@ import { useWeddingStore } from "@/store/useWeddingStore";
 import { toast } from "sonner";
 import { TipoSwitch } from "./fornecedor/TipoSwitch";
 import { ParcelasEditor } from "./fornecedor/ParcelasEditor";
+import { TagsInput } from "./fornecedor/TagsInput";
+import { suggestCategoria } from "@/lib/suggestCategoria";
 
 interface Props {
   open: boolean;
