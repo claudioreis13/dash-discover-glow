@@ -18,6 +18,9 @@ interface Props {
   onFilterCatChange: (v: CategoriaType | "todos") => void;
   filterStatus: StatusType | "todos";
   onFilterStatusChange: (v: StatusType | "todos") => void;
+  filterTag: string;
+  onFilterTagChange: (v: string) => void;
+  availableTags: string[];
   sortBy: SortBy;
   onSortByChange: (v: SortBy) => void;
   hasActiveFilters: boolean;
