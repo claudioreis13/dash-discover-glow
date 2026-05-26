@@ -332,6 +332,27 @@ export function FornecedorDialog({
               </>
             )}
             <div className="col-span-2">
+              <Label>Pago por</Label>
+              <Select
+                value={form.pagoPor ?? "__none"}
+                onValueChange={(v) =>
+                  setField("pagoPor", v === "__none" ? undefined : (v as PagoPorType))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Não especificado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none">Não especificado</SelectItem>
+                  {Object.entries(PAGO_POR_LABELS).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>
+                      {v}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="col-span-2">
               <Label htmlFor="obs">Observações</Label>
               <Textarea
                 id="obs"
