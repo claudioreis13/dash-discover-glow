@@ -104,6 +104,7 @@ type FornecedorRow = {
   contato: string | null;
   email: string | null;
   tipo: string | null;
+  pago_por: string | null;
 };
 
 function rowToFornecedor(r: FornecedorRow): Fornecedor {
@@ -121,6 +122,7 @@ function rowToFornecedor(r: FornecedorRow): Fornecedor {
     contato: r.contato ?? undefined,
     email: r.email ?? undefined,
     tipo: (r.tipo as Fornecedor["tipo"]) ?? undefined,
+    pagoPor: (r.pago_por as Fornecedor["pagoPor"]) ?? undefined,
   };
 }
 
@@ -221,26 +223,50 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => {
 
     logActivity: (entry) => {
       const userId = get().userId;
-      const next: ActivityEntry = {
+      if (!userId) return;
+      // Optimistic insert with temp id; replace with server row on success.
+      const tempId = crypto.randomUUID();
+      const optimistic: ActivityEntry = {
         ...entry,
-        id: crypto.randomUUID(),
+        id: tempId,
         timestamp: Date.now(),
       };
-      set((s) => {
-        const list = [next, ...s.activity].slice(0, ACTIVITY_LIMIT);
-        if (userId) persistActivity(userId, list);
-        return { activity: list };
-      });
+      set((s) => ({ activity: [optimistic, ...s.activity].slice(0, ACTIVITY_LIMIT) }));
+      void appendAuditLog({
+        data: {
+          type: entry.type,
+          description: entry.description,
+          fornecedorNome: entry.fornecedorNome,
+        },
+      })
+        .then((row) => {
+          const r = row as AuditLogRow | null;
+          if (!r) return;
+          const real = rowToActivity(r);
+          set((s) => ({
+            activity: s.activity.map((a) => (a.id === tempId ? real : a)),
+          }));
+        })
+        .catch((e) => {
+          console.error("[wedding] appendAuditLog failed", e);
+          set((s) => ({ activity: s.activity.filter((a) => a.id !== tempId) }));
+        });
     },
 
     clearActivity: () => {
       const userId = get().userId;
+      if (!userId) return;
+      const prev = get().activity;
       set({ activity: [] });
-      if (userId) persistActivity(userId, []);
+      void clearAuditLog().catch((e) => {
+        console.error("[wedding] clearAuditLog failed", e);
+        set({ activity: prev });
+        toast.error("Não foi possível limpar o histórico");
+      });
     },
 
     loadForUser: async (userId) => {
-      set({ userId, hydrated: false, activity: loadActivity(userId) });
+      set({ userId, hydrated: false, activity: [] });
       try {
         const res = await loadWeddingData();
         const fornecedores = (res.fornecedores ?? []).map((r) =>
@@ -253,7 +279,10 @@ export const useWeddingStore = create<WeddingStore>()((set, get) => {
         };
         const orcamentoTotal = Number(s?.orcamento_total) || 45000;
         const darkMode = !!s?.dark_mode;
-        set({ fornecedores, settings, orcamentoTotal, darkMode, hydrated: true });
+        const activity = (res.auditLog ?? []).map((r) =>
+          rowToActivity(r as AuditLogRow),
+        );
+        set({ fornecedores, settings, orcamentoTotal, darkMode, activity, hydrated: true });
       } catch (e) {
         console.error("[wedding] loadForUser failed", e);
         set({ hydrated: true });
