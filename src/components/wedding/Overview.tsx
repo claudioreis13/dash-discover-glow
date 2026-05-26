@@ -17,6 +17,7 @@ import { SectionHeader } from "./SectionHeader";
 import { ParcelStrip } from "./ParcelStrip";
 import { OverviewSkeleton } from "./OverviewSkeleton";
 import { SmartAlerts } from "./SmartAlerts";
+import { DivisaoDespesas } from "./DivisaoDespesas";
 import {
   formatCurrency,
   useFinancialCalculations,
@@ -160,6 +161,9 @@ export function Overview() {
           <ActivityFeed />
         </div>
       </section>
+
+      <DivisaoDespesas />
+
 
       {/* ───────────── Categorias ───────────── */}
       <section className="space-y-5">
