@@ -17,6 +17,8 @@ import { useWeddingStore } from "@/store/useWeddingStore";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+import { ExportMenu } from "./ExportMenu";
+
 export function Relatorios() {
   const { fornecedores } = useWeddingStore();
   const { gastosPorCategoria, dashboard } = useFinancialCalculations();
@@ -45,6 +47,10 @@ export function Relatorios() {
 
   return (
     <div className="grid gap-6">
+      <div className="flex justify-end">
+        <ExportMenu />
+      </div>
+
       <div className="grid md:grid-cols-3 gap-4">
         <Card className="p-5">
           <p className="text-xs uppercase tracking-wider text-muted-foreground">

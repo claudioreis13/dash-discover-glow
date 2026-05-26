@@ -16,6 +16,7 @@ import { PaymentCalendar } from "./PaymentCalendar";
 import { SectionHeader } from "./SectionHeader";
 import { ParcelStrip } from "./ParcelStrip";
 import { OverviewSkeleton } from "./OverviewSkeleton";
+import { SmartAlerts } from "./SmartAlerts";
 import {
   formatCurrency,
   useFinancialCalculations,
@@ -69,6 +70,10 @@ export function Overview() {
   return (
     <div className="space-y-10">
       <HeroCard />
+
+      <SmartAlerts />
+
+
 
       {/* ───────────── Finanças ───────────── */}
       <section className="space-y-5">
