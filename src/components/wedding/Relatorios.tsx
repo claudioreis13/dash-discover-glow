@@ -140,6 +140,10 @@ export function Relatorios() {
         </div>
       </Card>
 
+      <VencimentosHeatmap />
+
+      <ParetoCard />
+
       <Card className="p-6">
         <h3 className="text-lg font-semibold mb-4">
           Resumo por categoria
