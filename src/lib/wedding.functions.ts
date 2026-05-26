@@ -67,6 +67,7 @@ function toRow(f: z.infer<typeof fornecedorSchema>, userId: string) {
     email: f.email ?? null,
     tipo: f.tipo ?? null,
     pago_por: f.pagoPor ?? null,
+    tags: f.tags ?? [],
   };
 }
 
