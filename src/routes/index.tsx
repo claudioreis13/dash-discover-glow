@@ -33,7 +33,7 @@ function WeddingDashboard() {
   }, [darkMode]);
 
   return (
-    <div className="min-h-screen bg-background pb-[env(safe-area-inset-bottom)]">
+    <div className="min-h-screen bg-background pb-[calc(env(safe-area-inset-bottom)+6rem)]">
       <header className="sticky top-0 z-40 backdrop-blur-xl bg-background/80 border-b border-border">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2 sm:py-3 flex flex-col sm:flex-row sm:items-center sm:justify-center gap-2 sm:gap-0 relative">
           <div className="w-full sm:w-auto order-2 sm:order-1 min-w-0">
