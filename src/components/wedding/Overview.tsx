@@ -150,6 +150,8 @@ export function Overview() {
         </div>
       </section>
 
+      <ContribuicoesTerceiros buckets={terceirosDetalhes} />
+
       {/* ───────────── Cronograma ───────────── */}
       <section className="space-y-5">
         <SectionHeader
