@@ -8,6 +8,8 @@ import {
   deleteFornecedor as sfDeleteFornecedor,
   updateFornecedorParcelas,
   saveUserSettings,
+  appendAuditLog,
+  clearAuditLog,
 } from "@/lib/wedding.functions";
 
 function extractErrorMessage(e: unknown, fallback: string): string {
