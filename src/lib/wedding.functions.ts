@@ -73,9 +73,14 @@ export const loadWeddingData = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const [fornRes, settingsRes] = await Promise.all([
+    const [fornRes, settingsRes, auditRes] = await Promise.all([
       supabase.from("fornecedores").select("*").order("created_at", { ascending: true }),
       supabase.from("user_settings").select("*").eq("user_id", userId).maybeSingle(),
+      supabase
+        .from("audit_log")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100),
     ]);
     if (fornRes.error) throw new Error(fornRes.error.message);
 
@@ -95,8 +100,10 @@ export const loadWeddingData = createServerFn({ method: "GET" })
     return {
       fornecedores: fornRes.data ?? [],
       settings: settingsRow,
+      auditLog: auditRes.data ?? [],
     };
   });
+
 
 export const createFornecedor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
