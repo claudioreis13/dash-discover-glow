@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      audit_log: {
+        Row: {
+          created_at: string
+          description: string
+          fornecedor_nome: string | null
+          id: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          fornecedor_nome?: string | null
+          id?: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          fornecedor_nome?: string | null
+          id?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       fornecedores: {
         Row: {
           categoria: string
@@ -24,6 +51,7 @@ export type Database = {
           id: string
           nome: string
           observacoes: string
+          pago_por: string | null
           parcelas: Json
           prioridade: string
           status: string
@@ -42,6 +70,7 @@ export type Database = {
           id?: string
           nome: string
           observacoes?: string
+          pago_por?: string | null
           parcelas?: Json
           prioridade?: string
           status?: string
@@ -60,6 +89,7 @@ export type Database = {
           id?: string
           nome?: string
           observacoes?: string
+          pago_por?: string | null
           parcelas?: Json
           prioridade?: string
           status?: string
