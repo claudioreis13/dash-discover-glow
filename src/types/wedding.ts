@@ -14,6 +14,21 @@ export type StatusType = "pago" | "parcial" | "pendente" | "atrasado";
 export type PrioridadeType = "alta" | "média" | "baixa";
 export type TipoLancamento = "fornecedor" | "avulso";
 
+export type PagoPorType =
+  | "noivo"
+  | "noiva"
+  | "pais_noivo"
+  | "pais_noiva"
+  | "compartilhado";
+
+export const PAGO_POR_LABELS: Record<PagoPorType, string> = {
+  noivo: "Noivo",
+  noiva: "Noiva",
+  pais_noivo: "Pais do noivo",
+  pais_noiva: "Pais da noiva",
+  compartilhado: "Compartilhado",
+};
+
 export interface Parcela {
   numero: number;
   valor: number;
@@ -35,6 +50,7 @@ export interface Fornecedor {
   contato?: string;
   email?: string;
   tipo?: TipoLancamento;
+  pagoPor?: PagoPorType;
 }
 
 export const CATEGORIA_LABELS: Record<CategoriaType, string> = {

@@ -17,6 +17,13 @@ const categoriaEnum = z.enum([
 const statusEnum = z.enum(["pago", "parcial", "pendente", "atrasado"]);
 const prioridadeEnum = z.enum(["alta", "média", "baixa"]);
 const tipoEnum = z.enum(["fornecedor", "avulso"]);
+const pagoPorEnum = z.enum([
+  "noivo",
+  "noiva",
+  "pais_noivo",
+  "pais_noiva",
+  "compartilhado",
+]);
 
 const parcelaSchema = z.object({
   numero: z.number().int().min(1).max(120),
@@ -39,6 +46,7 @@ const fornecedorSchema = z.object({
   contato: z.string().max(200).optional(),
   email: z.string().max(200).optional(),
   tipo: tipoEnum.optional(),
+  pagoPor: pagoPorEnum.optional(),
 });
 
 function toRow(f: z.infer<typeof fornecedorSchema>, userId: string) {
@@ -57,6 +65,7 @@ function toRow(f: z.infer<typeof fornecedorSchema>, userId: string) {
     contato: f.contato ?? null,
     email: f.email ?? null,
     tipo: f.tipo ?? null,
+    pago_por: f.pagoPor ?? null,
   };
 }
 
@@ -64,9 +73,14 @@ export const loadWeddingData = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
-    const [fornRes, settingsRes] = await Promise.all([
+    const [fornRes, settingsRes, auditRes] = await Promise.all([
       supabase.from("fornecedores").select("*").order("created_at", { ascending: true }),
       supabase.from("user_settings").select("*").eq("user_id", userId).maybeSingle(),
+      supabase
+        .from("audit_log")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(100),
     ]);
     if (fornRes.error) throw new Error(fornRes.error.message);
 
@@ -86,8 +100,10 @@ export const loadWeddingData = createServerFn({ method: "GET" })
     return {
       fornecedores: fornRes.data ?? [],
       settings: settingsRow,
+      auditLog: auditRes.data ?? [],
     };
   });
+
 
 export const createFornecedor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -171,3 +187,39 @@ export const saveUserSettings = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ───────────── Audit Log ─────────────
+const auditEntrySchema = z.object({
+  type: z.enum(["add", "update", "delete", "pay", "unpay"]),
+  description: z.string().trim().min(1).max(500),
+  fornecedorNome: z.string().max(200).optional(),
+});
+
+export const appendAuditLog = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => auditEntrySchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+    const { data: row, error } = await supabase
+      .from("audit_log")
+      .insert({
+        user_id: userId,
+        type: data.type,
+        description: data.description,
+        fornecedor_nome: data.fornecedorNome ?? null,
+      } as never)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const clearAuditLog = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { supabase, userId } = context;
+    const { error } = await supabase.from("audit_log").delete().eq("user_id", userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
