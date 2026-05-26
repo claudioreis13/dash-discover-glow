@@ -19,6 +19,15 @@ export function useFinancialCalculations() {
   const { fornecedores, orcamentoTotal } = useWeddingStore();
 
   return useMemo(() => {
+    // "Casal" = noivo, noiva, compartilhado, ou não especificado.
+    // Pagamentos feitos por terceiros (pais, tios, madrinha, padrinho) ainda
+    // aparecem no total contratado, mas NÃO subtraem do orçamento do casal.
+    const isCasal = (f: (typeof fornecedores)[number]) =>
+      !f.pagoPor ||
+      f.pagoPor === "noivo" ||
+      f.pagoPor === "noiva" ||
+      f.pagoPor === "compartilhado";
+
     const valorComprometido = fornecedores.reduce(
       (a, f) => a + f.valorTotal,
       0,
@@ -28,9 +37,15 @@ export function useFinancialCalculations() {
       (a, f) => a + totalPendente(f),
       0,
     );
-    const saldoRestante = orcamentoTotal - valorComprometido;
+
+    const comprometidoCasal = fornecedores
+      .filter(isCasal)
+      .reduce((a, f) => a + f.valorTotal, 0);
+    const comprometidoTerceiros = valorComprometido - comprometidoCasal;
+
+    const saldoRestante = orcamentoTotal - comprometidoCasal;
     const percentualUtilizado =
-      orcamentoTotal > 0 ? (valorComprometido / orcamentoTotal) * 100 : 0;
+      orcamentoTotal > 0 ? (comprometidoCasal / orcamentoTotal) * 100 : 0;
 
     const porCategoria = new Map<
       CategoriaType,
@@ -83,6 +98,8 @@ export function useFinancialCalculations() {
         valorPago,
         valorPendente,
         valorComprometido,
+        comprometidoCasal,
+        comprometidoTerceiros,
         saldoRestante,
         percentualUtilizado,
         contratosTotal: fornecedores.length,

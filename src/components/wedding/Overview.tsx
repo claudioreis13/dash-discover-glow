@@ -126,7 +126,9 @@ export function Overview() {
             hint={
               dashboard.percentualUtilizado > 100
                 ? `Estourou em ${formatCurrency(Math.abs(dashboard.saldoRestante))}`
-                : `Restam ${formatCurrency(dashboard.saldoRestante)}`
+                : dashboard.comprometidoTerceiros > 0
+                  ? `Restam ${formatCurrency(dashboard.saldoRestante)} · ${formatCurrency(dashboard.comprometidoTerceiros)} por terceiros`
+                  : `Restam ${formatCurrency(dashboard.saldoRestante)}`
             }
             delay={0.15}
           />
@@ -140,7 +142,7 @@ export function Overview() {
                 value: g.total,
               }))}
               orcamentoTotal={dashboard.orcamentoTotal}
-              comprometido={dashboard.valorComprometido}
+              comprometido={dashboard.comprometidoCasal}
             />
           </div>
           <PaymentTimeline items={proximasParcelas} />
