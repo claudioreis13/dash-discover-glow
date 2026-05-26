@@ -18,6 +18,8 @@ import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { ExportMenu } from "./ExportMenu";
+import { VencimentosHeatmap } from "./VencimentosHeatmap";
+import { ParetoCard } from "./ParetoCard";
 
 export function Relatorios() {
   const { fornecedores } = useWeddingStore();
